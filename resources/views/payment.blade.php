@@ -355,27 +355,9 @@
                     <div class="method-title">E-Wallet</div>
                     
                     <label class="payment-option">
-                        <input type="radio" name="payment" value="gopay" onchange="selectPayment(this)">
-                        <div class="payment-logo" style="background: #00AED6;">GO</div>
-                        <span class="payment-name">GoPay</span>
-                    </label>
-
-                    <label class="payment-option">
-                        <input type="radio" name="payment" value="ovo" onchange="selectPayment(this)">
-                        <div class="payment-logo" style="background: #4C3494;">OVO</div>
-                        <span class="payment-name">OVO</span>
-                    </label>
-
-                    <label class="payment-option">
-                        <input type="radio" name="payment" value="dana" onchange="selectPayment(this)">
-                        <div class="payment-logo" style="background: #118EEA;">DANA</div>
-                        <span class="payment-name">DANA</span>
-                    </label>
-
-                    <label class="payment-option">
-                        <input type="radio" name="payment" value="shopeepay" onchange="selectPayment(this)">
-                        <div class="payment-logo" style="background: #EE4D2D;">SP</div>
-                        <span class="payment-name">ShopeePay</span>
+                        <input type="radio" name="payment" value="qris" onchange="selectPayment(this)">
+                        <div class="payment-logo" style="background: #8b7355;">QR</div>
+                        <span class="payment-name">QRIS (Scan QR)</span>
                     </label>
                 </div>
 
@@ -384,27 +366,9 @@
                     <div class="method-title">Transfer Bank</div>
                     
                     <label class="payment-option">
-                        <input type="radio" name="payment" value="bca" onchange="selectPayment(this)">
-                        <div class="payment-logo" style="background: #003D79;">BCA</div>
-                        <span class="payment-name">Bank BCA</span>
-                    </label>
-
-                    <label class="payment-option">
-                        <input type="radio" name="payment" value="mandiri" onchange="selectPayment(this)">
-                        <div class="payment-logo" style="background: #003D79;">MDR</div>
-                        <span class="payment-name">Bank Mandiri</span>
-                    </label>
-
-                    <label class="payment-option">
-                        <input type="radio" name="payment" value="bni" onchange="selectPayment(this)">
-                        <div class="payment-logo" style="background: #F47920;">BNI</div>
-                        <span class="payment-name">Bank BNI</span>
-                    </label>
-
-                    <label class="payment-option">
-                        <input type="radio" name="payment" value="bri" onchange="selectPayment(this)">
-                        <div class="payment-logo" style="background: #003D79;">BRI</div>
-                        <span class="payment-name">Bank BRI</span>
+                        <input type="radio" name="payment" value="bank_transfer" onchange="selectPayment(this)">
+                        <div class="payment-logo" style="background: #2196F3;">🏦</div>
+                        <span class="payment-name">Transfer Bank (Manual)</span>
                     </label>
                 </div>
 

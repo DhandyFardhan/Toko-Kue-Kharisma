@@ -231,6 +231,7 @@
                 @php
                     $statusMap = [
                         'pending'     => ['label' => 'Menunggu Verifikasi', 'class' => 'status-pending'],
+                        'paid'        => ['label' => 'Dibayar',             'class' => 'status-processing'],
                         'verified'    => ['label' => 'Diverifikasi',        'class' => 'status-processing'],
                         'in_progress' => ['label' => 'Diproses',            'class' => 'status-processing'],
                         'completed'   => ['label' => 'Selesai',             'class' => 'status-completed'],
@@ -435,20 +436,7 @@
             container.innerHTML = markup;
         }
 
-        function fetchOrderHistory() {
-            fetch('/api/orders/history', {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.orders) {
-                        renderOrderHistory(data.orders);
-                    }
-                })
-                .catch(error => console.error('Error fetching order history:', error));
-        }
+     
 
         // Load cart count on page load
         document.addEventListener('DOMContentLoaded', function() {

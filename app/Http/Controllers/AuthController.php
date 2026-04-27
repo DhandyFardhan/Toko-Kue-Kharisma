@@ -12,6 +12,9 @@ use App\Models\Order;
 
 class AuthController extends Controller
 {
+    /**
+     * Menampilkan Halaman Home
+     */
     public function showHome()
     {
         $products = Product::take(4)->get();
@@ -20,10 +23,12 @@ class AuthController extends Controller
         return view('home', compact('products', 'reviews', 'totalReviews'));
     }
 
+    /**
+     * Menampilkan Halaman Profil & Riwayat Pesanan
+     */
     public function showProfile()
     {
         $user = Auth::user();
-
         if (!$user) {
             return redirect('/login');
         }
@@ -36,47 +41,65 @@ class AuthController extends Controller
         return view('profile', compact('user', 'orders'));
     }
 
+    /**
+     * Update Informasi Profil & Alamat Pengiriman
+     */
     public function updateProfile(Request $request)
     {
         $user = Auth::user();
 
         $validated = $request->validate([
-            'name'    => 'required|string|max:255',
-            'phone'   => 'nullable|string|max:20',
-            'address' => 'nullable|string|max:500',
+            'name'      => 'nullable|string|max:255',
+            'email'     => 'nullable|email|unique:users,email,' . $user->id,
+            'phone'     => 'nullable|string|max:20',
+            'address'   => 'nullable|string|max:500',
+            'latitude'  => 'nullable|string', 
+            'longitude' => 'nullable|string',
+            'birthdate' => 'nullable|date',
+            'gender'    => 'nullable|string',
         ]);
 
-        $user->update($validated);
+        // Filter: Hanya ambil data yang tidak null agar tidak menimpa data lama
+        $dataUpdate = array_filter($validated, function ($value) {
+            return !is_null($value);
+        });
 
-        return redirect()->route('profile')->with('success', 'Profil berhasil diperbarui.');
+        $user->update($dataUpdate);
+
+        $pesan = $request->has('address') ? 'Alamat pengiriman berhasil diperbarui!' : 'Informasi profil berhasil diperbarui!';
+
+        return redirect()->route('profile')->with('success', $pesan);
     }
 
+    /**
+     * Update Password
+     */
     public function updatePassword(Request $request)
     {
         $user = Auth::user();
 
         $request->validate([
-            'current_password'      => 'required',
-            'new_password'          => 'required|min:8|confirmed',
+            'old_password' => 'required',
+            'password'     => 'required|min:8|confirmed',
         ]);
 
-        if (!Hash::check($request->current_password, $user->password)) {
+        if (!Hash::check($request->old_password, $user->password)) {
             return redirect()->route('profile')
-                ->with('password_error', 'Password saat ini tidak sesuai.')
+                ->with('error', 'Password saat ini tidak sesuai.')
                 ->withFragment('settings');
         }
 
-        $user->update(['password' => Hash::make($request->new_password)]);
+        $user->update(['password' => Hash::make($request->password)]);
 
         return redirect()->route('profile')
-            ->with('password_success', 'Password berhasil diubah.')
+            ->with('success', 'Kata sandi berhasil diupdate!')
             ->withFragment('settings');
     }
 
-    public function showLogin()
-    {
-        return view('login');
-    }
+    /**
+     * Auth Functions (Login, Register, Logout)
+     */
+    public function showLogin() { return view('login'); }
 
     public function login(Request $request)
     {
@@ -85,32 +108,23 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        // Try to authenticate with database
         if (Auth::attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();
-            
             $user = Auth::user();
-            
-            // Check if admin (role-based)
             $isAdmin = $user->role === 'admin';
-            session(['user_logged_in' => true, 'is_admin' => $isAdmin, 'user_name' => $user->name]);
+            session([
+                'user_logged_in' => true, 
+                'is_admin' => $isAdmin, 
+                'user_name' => $user->name
+            ]);
 
-            if ($isAdmin) {
-                return redirect('/admin');
-            }
-
-            return redirect()->intended('/profile');
+            return $isAdmin ? redirect('/admin') : redirect()->intended('/profile');
         }
 
-        return back()->withErrors([
-            'email' => 'Email atau password salah.',
-        ])->onlyInput('email');
+        return back()->withErrors(['email' => 'Email atau password salah.'])->onlyInput('email');
     }
 
-    public function showRegister()
-    {
-        return view('register');
-    }
+    public function showRegister() { return view('register'); }
 
     public function register(Request $request)
     {
@@ -120,7 +134,6 @@ class AuthController extends Controller
             'password' => 'required|min:8|confirmed',
         ]);
 
-        // Create user in database
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],

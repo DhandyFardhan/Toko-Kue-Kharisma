@@ -360,17 +360,21 @@
             transform: none;
         }
 
-        .product-card {
-            background: linear-gradient(135deg, #d4b896 0%, #c9a882 100%);
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s;
-        }
+     .product-card {
+    background: linear-gradient(135deg, #d4b896 0%, #c9a882 100%);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); /* Bayangan awal lebih tipis */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efek membal */
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
 
-        .product-card:hover {
-            transform: translateY(-5px);
-        }
+.product-card:hover {
+    transform: translateY(-10px); /* Naik lebih tinggi */
+    box-shadow: 0 15px 30px rgba(139, 115, 85, 0.3); /* Bayangan berwarna kecokelatan */
+}
 
         .product-image-container {
             background: white;
@@ -565,6 +569,63 @@
             .menu-section { padding: 20px 15px; }
             .menu-title { font-size: 24px; }
         }
+        .product-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    transition: transform 0.5s ease; /* Tambahkan transisi ini */
+}
+
+.product-card:hover .product-image {
+    transform: scale(1.1); /* Zoom in 10% */
+}
+.btn-add-cart {
+    /* ... kode lama kamu ... */
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-add-cart:hover {
+    background: #5d4d3c;
+    letter-spacing: 0.5px; /* Teks sedikit melebar */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.btn-add-cart:active {
+    transform: scale(0.95); /* Efek tertekan saat diklik */
+}
+.search-input {
+    /* ... kode lama kamu ... */
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    border-color: #8b7355;
+    box-shadow: 0 0 0 4px rgba(139, 115, 85, 0.2); /* Efek ring di sekitar input */
+    max-width: 450px; /* Sedikit memanjang saat diketik */
+}
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.product-card {
+    animation: fadeInUp 0.6s ease backwards;
+}
+
+/* Memberikan jeda tiap kartu (Staggered Animation) */
+.product-card:nth-child(1) { animation-delay: 0.1s; }
+.product-card:nth-child(2) { animation-delay: 0.2s; }
+.product-card:nth-child(3) { animation-delay: 0.3s; }
+.product-card:nth-child(4) { animation-delay: 0.4s; }
+        
     </style>
 </head>
 <body>

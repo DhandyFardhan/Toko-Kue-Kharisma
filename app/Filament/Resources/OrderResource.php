@@ -53,6 +53,7 @@ class OrderResource extends Resource
                     ->label('Status')
                     ->options([
                         'pending'     => 'Menunggu Verifikasi',
+                        'paid'        => 'Paid (Midtrans)',
                         'verified'    => 'Diverifikasi',
                         'in_progress' => 'Sedang Diproses',
                         'completed'   => 'Selesai',
@@ -80,11 +81,17 @@ class OrderResource extends Resource
                 TextColumn::make('payment_method')
                     ->label('Pembayaran')
                     ->badge()
-                    ->formatStateUsing(fn ($state) => strtoupper($state))
+                    ->formatStateUsing(fn ($state) => match ($state) {
+                        'qris'           => 'QRIS',
+                        'cod'            => 'COD',
+                        'bank_transfer'  => 'Transfer Bank',
+                        default          => strtoupper($state),
+                    })
                     ->color(fn ($state) => match ($state) {
-                        'qris' => 'info',
-                        'cod'  => 'success',
-                        default => 'gray',
+                        'qris'           => 'info',
+                        'cod'            => 'success',
+                        'bank_transfer'  => 'warning',
+                        default          => 'gray',
                     }),
 
                 TextColumn::make('total')
@@ -97,6 +104,7 @@ class OrderResource extends Resource
                     ->badge()
                     ->formatStateUsing(fn ($state) => match ($state) {
                         'pending'     => 'Menunggu',
+                        'paid'        => 'Paid',
                         'verified'    => 'Diverifikasi',
                         'in_progress' => 'Diproses',
                         'completed'   => 'Selesai',
@@ -105,6 +113,7 @@ class OrderResource extends Resource
                     })
                     ->color(fn ($state) => match ($state) {
                         'pending'     => 'warning',
+                        'paid'        => 'success',
                         'verified'    => 'info',
                         'in_progress' => 'primary',
                         'completed'   => 'success',
@@ -123,6 +132,7 @@ class OrderResource extends Resource
                     ->label('Status')
                     ->options([
                         'pending'     => 'Menunggu Verifikasi',
+                        'paid'        => 'Paid (Midtrans)',
                         'verified'    => 'Diverifikasi',
                         'in_progress' => 'Sedang Diproses',
                         'completed'   => 'Selesai',
@@ -132,8 +142,9 @@ class OrderResource extends Resource
                 SelectFilter::make('payment_method')
                     ->label('Metode Bayar')
                     ->options([
-                        'qris' => 'QRIS',
-                        'cod'  => 'COD',
+                        'qris'           => 'QRIS',
+                        'cod'            => 'COD',
+                        'bank_transfer'  => 'Transfer Bank',
                     ]),
             ])
             ->actions([
@@ -210,25 +221,36 @@ class OrderResource extends Resource
                             ->label('Status')
                             ->badge()
                             ->formatStateUsing(fn ($state) => match ($state) {
-                                'pending'     => 'Menunggu',
-                                'verified'    => 'Diverifikasi',
-                                'in_progress' => 'Diproses',
-                                'completed'   => 'Selesai',
-                                'cancelled'   => 'Dibatalkan',
-                                default       => $state,
+                                'pending'           => 'Menunggu',
+                                'pending_payment'   => 'Menunggu Bayar',
+                                'confirmed'         => 'Terkonfirmasi',
+                                'paid'              => 'Paid',
+                                'verified'          => 'Diverifikasi',
+                                'in_progress'       => 'Diproses',
+                                'completed'         => 'Selesai',
+                                'cancelled'         => 'Dibatalkan',
+                                default             => $state,
                             })
                             ->color(fn ($state) => match ($state) {
-                                'pending'     => 'warning',
-                                'verified'    => 'info',
-                                'in_progress' => 'primary',
-                                'completed'   => 'success',
-                                'cancelled'   => 'danger',
-                                default       => 'gray',
+                                'pending'           => 'warning',
+                                'pending_payment'   => 'danger',
+                                'confirmed'         => 'success',
+                                'paid'              => 'success',
+                                'verified'          => 'info',
+                                'in_progress'       => 'primary',
+                                'completed'         => 'success',
+                                'cancelled'         => 'danger',
+                                default             => 'gray',
                             }),
                         TextEntry::make('user.name')->label('Pelanggan'),
                         TextEntry::make('user.phone')->label('No. Telepon')->default('-'),
                         TextEntry::make('payment_method')->label('Metode Bayar')
-                            ->formatStateUsing(fn ($state) => strtoupper($state)),
+                            ->formatStateUsing(fn ($state) => match ($state) {
+                                'qris'           => 'QRIS',
+                                'cod'            => 'COD',
+                                'bank_transfer'  => 'Transfer Bank',
+                                default          => strtoupper($state),
+                            }),
                         TextEntry::make('created_at')->label('Tanggal Pesan')->dateTime('d M Y, H:i'),
                         TextEntry::make('notes')->label('Catatan')->default('-')->columnSpanFull(),
                         TextEntry::make('delivery_address')->label('Alamat Pengiriman')->default('-')->columnSpanFull(),
@@ -255,6 +277,45 @@ class OrderResource extends Resource
                             ])
                             ->columns(4),
                     ]),
+
+                Section::make('Bukti Pembayaran (Transfer Bank)')
+                    ->visible(fn (Order $record) => $record->payment_method === 'bank_transfer')
+                    ->schema([
+                        TextEntry::make('paymentProof.bank_name')
+                            ->label('Bank Pengirim')
+                            ->default('-'),
+                        TextEntry::make('paymentProof.account_name')
+                            ->label('Atas Nama')
+                            ->default('-'),
+                        TextEntry::make('paymentProof.amount')
+                            ->label('Jumlah Transfer')
+                            ->money('IDR')
+                            ->default('-'),
+                        TextEntry::make('paymentProof.status')
+                            ->label('Status Bukti')
+                            ->badge()
+                            ->formatStateUsing(fn ($state) => match ($state) {
+                                'pending'   => 'Menunggu Verifikasi',
+                                'verified'  => 'Diverifikasi',
+                                'rejected'  => 'Ditolak',
+                                default     => '-',
+                            })
+                            ->color(fn ($state) => match ($state) {
+                                'pending'   => 'warning',
+                                'verified'  => 'success',
+                                'rejected'  => 'danger',
+                                default     => 'gray',
+                            })
+                            ->default('-'),
+                        \Filament\Infolists\Components\ImageEntry::make('paymentProof.proof_image')
+                            ->label('Bukti Transfer')
+                            ->disk('public')
+                            ->default('-'),
+                        TextEntry::make('paymentProof.admin_notes')
+                            ->label('Catatan Admin')
+                            ->default('-')
+                            ->markdown(),
+                    ])->columns(2),
             ]);
     }
 

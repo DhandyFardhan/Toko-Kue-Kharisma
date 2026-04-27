@@ -84,11 +84,40 @@
             text-decoration: none;
             font-size: 15px;
             font-weight: 600;
-            transition: color 0.3s;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 8px 15px;
+            border-radius: 8px;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #8b7355, #c9a882);
+            transition: width 0.3s ease;
+            border-radius: 3px;
         }
 
         nav a:hover {
             color: #2c2c2c;
+            background: rgba(139, 115, 85, 0.1);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        nav a.active {
+            color: #2c2c2c;
+            background: rgba(139, 115, 85, 0.2);
+        }
+
+        nav a.active::after {
+            width: 100%;
         }
 
         .header-icons {
@@ -365,7 +394,7 @@
         /* Hero Section */
         .hero {
             position: relative;
-            height: 400px;
+            height: 250px;
             overflow: hidden;
             cursor: pointer;
         }
@@ -462,18 +491,37 @@
             margin: 0 auto;
         }
 
-        .product-card {
-            background: linear-gradient(135deg, #d4b896 0%, #c9a882 100%);
-            border-radius: 20px;
-            padding: 25px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s;
-        }
+       .product-card {
+    background: linear-gradient(135deg, #d4b896 0%, #c9a882 100%);
+    border-radius: 20px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 
-        .product-card:hover {
-            transform: translateY(-5px);
-        }
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.6s ease forwards;
+}
+
+/* delay animasi */
+.product-card:nth-child(1) { animation-delay: 0.1s; }
+.product-card:nth-child(2) { animation-delay: 0.2s; }
+.product-card:nth-child(3) { animation-delay: 0.3s; }
+.product-card:nth-child(4) { animation-delay: 0.4s; }
+.product-card:nth-child(5) { animation-delay: 0.5s; }
+.product-card:nth-child(6) { animation-delay: 0.6s; }
+
+/* INI YANG KURANG */
+@keyframes fadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.product-card:hover {
+    transform: translateY(-10px) scale(1.03);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+}
 
         @keyframes highlight {
             0%, 100% { transform: scale(1); }
@@ -1023,6 +1071,24 @@
             .reviews-section { padding: 30px 15px; }
             .hero { height: 250px; }
         }
+        .hero {
+    animation: zoomHero 6s ease-in-out infinite alternate;
+}
+
+@keyframes zoomHero {
+    from { transform: scale(1); }
+    to { transform: scale(1.05); }
+}
+        .fade-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+}
+
+.fade-up.show {
+    opacity: 1;
+    transform: translateY(0);
+}
     </style>
 </head>
 <body>
@@ -1036,11 +1102,14 @@
         </div>
         
         <nav id="navMenu">
-            <a href="/">home</a>
-            <a href="/menu">menu</a>
-            <a href="/kontak">kontak</a>
-            <a href="/promo">promo</a>
-        </nav>
+    <a href="/">home</a>
+    <a href="/menu">menu</a>
+    <a href="/kontak">kontak</a>
+    <a href="/promo">promo</a>
+    @auth
+        <a href="/riwayat">riwayat</a>
+    @endauth
+</nav>
 
         <div class="header-icons">
             <div class="icon-wrapper">
@@ -1099,7 +1168,7 @@
 
     <!-- Best Sellers Section -->
     <section class="best-sellers">
-        <h2 class="section-title">Best sellers</h2>
+        <h2 class="section-title">Best Sellers</h2>
         <div class="section-divider"></div>
 
         <div class="products-grid">
@@ -1634,5 +1703,18 @@
             });
         });
     </script>
+    <script>
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('show');
+        }
+    });
+});
+
+document.querySelectorAll('.fade-up').forEach(el => {
+    observer.observe(el);
+});
+</script>
 </body>
 </html>

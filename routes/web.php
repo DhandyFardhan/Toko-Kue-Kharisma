@@ -1,59 +1,56 @@
 <?php
 
-use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\MidtransController;
 
+// Halaman Publik
 Route::get('/', [AuthController::class, 'showHome'])->name('home');
 Route::get('/menu', [ProductController::class, 'index'])->name('menu');
-Route::get('/promo', function () {
-    return view('promo');
-})->name('promo');
-Route::get('/cart', [CartController::class, 'index'])->name('cart');
+Route::get('/promo', fn() => view('promo'))->name('promo');
+Route::get('/kontak', fn() => view('kontak'))->name('kontak');
+Route::get('/ulasan', [ReviewController::class, 'index'])->name('reviews.index');
+Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+Route::get('/api/cart/count', [CartController::class, 'count'])->name('api.cart.count');
 
-// Cart API routes (AJAX)
-Route::middleware('auth')->group(function () {
-    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
-    Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
-    Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
-    Route::get('/cart/summary', [CartController::class, 'summary'])->name('cart.summary');
-    Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
-    Route::get('/api/cart/count', [CartController::class, 'count'])->name('api.cart.count');
+// Auth (Guest)
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
 });
 
-Route::post('/checkout', [OrderController::class, 'store'])->name('checkout')->middleware('auth');
-Route::get('/kontak', function () {
-    return view('kontak');
-})->name('kontak');
-Route::get('/riwayat', [OrderController::class, 'history'])->name('riwayat')->middleware('auth');
-Route::get('/api/orders/history', [OrderController::class, 'historyJson'])->name('api.orders.history')->middleware('auth');
-Route::get('/payment', function () {
-    return view('payment');
-})->name('payment');
-
-// Review routes
-Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
-Route::get('/ulasan', [ReviewController::class, 'index'])->name('reviews.index');
-
-// Admin routes (legacy - digantikan Filament di /admin)
-// Route::middleware([Authenticate::class, EnsureAdmin::class])->group(function () {
-//     Route::get('/admin', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-//     Route::get('/admin/pesanan-baru', [AdminController::class, 'newOrders'])->name('admin.new-orders');
-//     Route::post('/admin/orders/{id}/verify', [AdminController::class, 'verifyOrder'])->name('admin.orders.verify');
-// });
-
+// Auth (Logged In)
 Route::middleware('auth')->group(function () {
+    // Profil & Keamanan
     Route::get('/profile', [AuthController::class, 'showProfile'])->name('profile');
     Route::put('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
     Route::put('/profile/password', [AuthController::class, 'updatePassword'])->name('profile.password');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    // Keranjang & Checkout
+    Route::get('/cart', [CartController::class, 'index'])->name('cart');
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
+    Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
+    Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+    Route::get('/cart/summary', [CartController::class, 'summary'])->name('cart.summary');
+    
+    // Pesanan & Pembayaran (DI SINI PERUBAHANNYA)
+Route::post('/order/store', [OrderController::class, 'store'])->name('checkout'); 
+Route::post('/checkout', [OrderController::class, 'store'])->name('checkout');
+    Route::get('/riwayat', [OrderController::class, 'history'])->name('riwayat'); // Jalur ke riwayat
+    Route::get('/api/orders/history', [OrderController::class, 'historyJson'])->name('api.orders.history');
+    
+    Route::get('/payment/upload/{orderId}', [PaymentController::class, 'show'])->name('payment.upload');
+    Route::post('/payment/upload', [PaymentController::class, 'uploadProof'])->name('payment.upload-proof');
 });
 
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
-Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::post('/midtrans/notification', [MidtransController::class, 'notification'])->name('midtrans.notification');

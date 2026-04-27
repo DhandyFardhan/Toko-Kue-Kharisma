@@ -10,229 +10,136 @@ use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
-    /**
-     * Menampilkan halaman keranjang
-     */
     public function index()
     {
         $user = Auth::user();
-        if (!$user) {
-            return redirect()->route('login');
-        }
+        if (!$user) return redirect()->route('login');
 
-        $cartItems = Cart::forUser($user->id)
-            ->with('product')
-            ->get();
-
-        $totalItems = Cart::getTotalItems($user->id);
-        $totalPrice = Cart::getTotalPrice($user->id);
+        $cartItems = Cart::where('user_id', $user->id)->with('product')->get();
+        $totalItems = $cartItems->sum('quantity');
+        $totalPrice = $cartItems->sum(function ($item) {
+            $price = $item->price ?? ($item->product->price ?? 0);
+            return $price * $item->quantity;
+        });
 
         return view('cart', compact('cartItems', 'totalItems', 'totalPrice', 'user'));
     }
 
-    /**
-     * Menambah produk ke keranjang (AJAX)
-     */
     public function add(Request $request): JsonResponse
-    {
-        $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'nullable|integer|min:1'
-        ]);
+{
+    // 0. Cek auth terlebih dahulu
+    $user = Auth::user();
+    if (!$user) {
+        return response()->json(['success' => false, 'message' => 'Login dulu'], 401);
+    }
 
-        $user = Auth::user();
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Silakan login terlebih dahulu'
-            ], 401);
-        }
+    $productId = $request->product_id;
+    $quantity = $request->quantity ?? 1;
+    $packageIds = [901, 902, 903];
 
-        $productId = $request->product_id;
-        $quantity = $request->quantity ?? 1;
-
-        // Cek apakah produk ada
+    // 1. Tentukan Nama & Harga
+    if (in_array($productId, $packageIds)) {
+        $packageMapping = [
+            901 => ['name' => 'Paketan Hemat A', 'price' => 20000],
+            902 => ['name' => 'Paketan Hemat B', 'price' => 20000],
+            903 => ['name' => 'Paketan Hemat C', 'price' => 20000],
+        ];
+        $productName = $packageMapping[$productId]['name'];
+        $finalPrice = $packageMapping[$productId]['price'];
+    } else {
+        // Validasi hanya untuk produk biasa
+        $request->validate(['product_id' => 'required|exists:products,id']);
+        
         $product = Product::find($productId);
         if (!$product) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Produk tidak ditemukan'
-            ], 404);
+            return response()->json(['success' => false, 'message' => 'Produk tidak ditemukan'], 404);
         }
-
-        // Update atau create cart item
-        $cartItem = Cart::updateOrCreateItem($user->id, $productId, $quantity);
-
-        // Hitung total items dan total price
-        $totalItems = Cart::getTotalItems($user->id);
-        $totalPrice = Cart::getTotalPrice($user->id);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Produk berhasil ditambahkan ke keranjang',
-            'data' => [
-                'product_name' => $product->name,
-                'quantity' => $cartItem->quantity,
-                'total_items' => $totalItems,
-                'total_price' => $totalPrice
-            ]
-        ]);
+        
+        $productName = $product->name;
+        $finalPrice = $request->price ?? $product->price;
     }
 
-    /**
-     * Update quantity item di keranjang (AJAX)
-     */
-    public function update(Request $request): JsonResponse
-    {
-        $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:0'
-        ]);
+        // 2. Simpan ke Keranjang
+        $cartItem = Cart::where('user_id', $user->id)->where('product_id', $productId)->first();
 
-        $user = Auth::user();
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Silakan login terlebih dahulu'
-            ], 401);
-        }
-
-        $productId = $request->product_id;
-        $quantity = $request->quantity;
-
-        if ($quantity == 0) {
-            // Hapus item jika quantity 0
-            Cart::forUser($user->id)->where('product_id', $productId)->delete();
+        if ($cartItem) {
+            $cartItem->quantity += $quantity;
+            $cartItem->price = $finalPrice;
+            $cartItem->save();
         } else {
-            // Update quantity
-            Cart::forUser($user->id)
-                ->where('product_id', $productId)
-                ->update(['quantity' => $quantity]);
-        }
-
-        $totalItems = Cart::getTotalItems($user->id);
-        $totalPrice = Cart::getTotalPrice($user->id);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Keranjang berhasil diperbarui',
-            'data' => [
-                'total_items' => $totalItems,
-                'total_price' => $totalPrice
-            ]
-        ]);
-    }
-
-    /**
-     * Hapus item dari keranjang (AJAX)
-     */
-    public function remove(Request $request): JsonResponse
-    {
-        $request->validate([
-            'product_id' => 'required|exists:products,id'
-        ]);
-
-        $user = Auth::user();
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Silakan login terlebih dahulu'
-            ], 401);
-        }
-
-        $productId = $request->product_id;
-
-        $cartItem = Cart::forUser($user->id)
-            ->where('product_id', $productId)
-            ->with('product')
-            ->first();
-
-        if (!$cartItem) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Item tidak ditemukan di keranjang'
-            ], 404);
-        }
-
-        $productName = $cartItem->product->name;
-        $cartItem->delete();
-
-        $totalItems = Cart::getTotalItems($user->id);
-        $totalPrice = Cart::getTotalPrice($user->id);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Produk berhasil dihapus dari keranjang',
-            'data' => [
-                'product_name' => $productName,
-                'total_items' => $totalItems,
-                'total_price' => $totalPrice
-            ]
-        ]);
-    }
-
-    /**
-     * Get cart summary (AJAX) - untuk update badge dan summary
-     */
-    public function summary(): JsonResponse
-    {
-        $user = Auth::user();
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Silakan login terlebih dahulu'
-            ], 401);
-        }
-
-        $totalItems = Cart::getTotalItems($user->id);
-        $totalPrice = Cart::getTotalPrice($user->id);
-
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'total_items' => $totalItems,
-                'total_price' => $totalPrice
-            ]
-        ]);
-    }
-
-    /**
-     * Clear all cart items
-     */
-    public function clear(): JsonResponse
-    {
-        $user = Auth::user();
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Silakan login terlebih dahulu'
-            ], 401);
-        }
-
-        Cart::forUser($user->id)->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Keranjang berhasil dikosongkan'
-        ]);
-    }
-
-    /**
-     * Get cart item count for badge
-     */
-    public function count(): JsonResponse
-    {
-        $user = Auth::user();
-        if (!$user) {
-            return response()->json([
-                'count' => 0
+            Cart::create([
+                'user_id' => $user->id,
+                'product_id' => $productId,
+                'quantity' => $quantity,
+                'price' => $finalPrice
             ]);
         }
 
-        $totalItems = Cart::getTotalItems($user->id);
+        return response()->json([
+            'success' => true,
+            'message' => 'Berhasil ditambah',
+            'data' => [
+                'product_name' => $productName,
+                'total_items' => Cart::getTotalItems($user->id),
+                'total_price' => Cart::getTotalPrice($user->id)
+            ]
+        ]);
+    }
+
+    public function update(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+        $productId = $request->product_id;
+        $quantity = $request->quantity;
+
+        if ($quantity <= 0) {
+            Cart::where('user_id', $user->id)->where('product_id', $productId)->delete();
+        } else {
+            Cart::where('user_id', $user->id)->where('product_id', $productId)->update(['quantity' => $quantity]);
+        }
 
         return response()->json([
-            'count' => $totalItems
+            'success' => true,
+            'data' => [
+                'total_items' => Cart::getTotalItems($user->id),
+                'total_price' => Cart::getTotalPrice($user->id)
+            ]
         ]);
+    }
+
+    public function remove(Request $request): JsonResponse
+    {
+        Cart::where('user_id', Auth::id())->where('product_id', $request->product_id)->delete();
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'total_items' => Cart::getTotalItems(Auth::id()),
+                'total_price' => Cart::getTotalPrice(Auth::id())
+            ]
+        ]);
+    }
+
+    public function summary(): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'total_items' => Cart::getTotalItems(Auth::id()),
+                'total_price' => Cart::getTotalPrice(Auth::id())
+            ]
+        ]);
+    }
+
+    public function count(): JsonResponse
+    {
+        $userId = Auth::id();
+        $count = $userId ? Cart::getTotalItems($userId) : 0;
+        return response()->json(['count' => $count]);
+    }
+
+    public function clear(): JsonResponse
+    {
+        Cart::where('user_id', Auth::id())->delete();
+        return response()->json(['success' => true]);
     }
 }

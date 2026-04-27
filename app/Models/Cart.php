@@ -10,24 +10,19 @@ class Cart extends Model
     protected $fillable = [
         'user_id',
         'product_id',
-        'quantity'
+        'quantity',
+        'price', 
     ];
 
     protected $casts = [
         'quantity' => 'integer'
     ];
 
-    /**
-     * Relationship dengan User
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Relationship dengan Product
-     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
@@ -38,39 +33,14 @@ class Cart extends Model
      */
     public function getSubtotalAttribute()
     {
-        return $this->quantity * $this->product->price;
+        // Gunakan price di cart (wajib ada untuk paket), fallback ke product price
+        $price = $this->price ?? ($this->product->price ?? 0);
+        return $this->quantity * $price;
     }
 
-    /**
-     * Scope untuk user tertentu
-     */
     public function scopeForUser($query, $userId)
     {
         return $query->where('user_id', $userId);
-    }
-
-    /**
-     * Update quantity atau create jika belum ada
-     */
-    public static function updateOrCreateItem($userId, $productId, $quantity)
-    {
-        $cartItem = static::where('user_id', $userId)
-            ->where('product_id', $productId)
-            ->first();
-
-        if ($cartItem) {
-            // Jika item sudah ada, tambahkan quantity
-            $cartItem->quantity += $quantity;
-            $cartItem->save();
-            return $cartItem;
-        } else {
-            // Jika item belum ada, buat baru
-            return static::create([
-                'user_id' => $userId,
-                'product_id' => $productId,
-                'quantity' => $quantity
-            ]);
-        }
     }
 
     /**
@@ -87,10 +57,11 @@ class Cart extends Model
     public static function getTotalPrice($userId)
     {
         return static::forUser($userId)
-            ->with('product')
             ->get()
             ->sum(function ($item) {
-                return $item->quantity * $item->product->price;
+                // Tambahkan pengecekan null agar ID paket 100-102 tidak error
+                $price = $item->price ?? ($item->product->price ?? 0);
+                return $item->quantity * $price;
             });
     }
 }

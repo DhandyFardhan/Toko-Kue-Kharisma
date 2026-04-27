@@ -4,929 +4,420 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profil - Toko Kue Kharisma</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg-original: #f5deb3;
+            --primary-brown: #8b7355;
+            --text-dark: #2c2c2c;
+            --white: #ffffff;
+            --accent: #bc6c25;
+            --shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: Arial, Helvetica, sans-serif;
-            background: #f5deb3;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-original);
+            color: var(--text-dark);
         }
 
-        /* Header */
+        /* HEADER MODERN & HIDUP */
         header {
             background: linear-gradient(135deg, #d4b896 0%, #c9a882 100%);
-            padding: 15px clamp(15px, 4vw, 50px);
+            padding: 15px 5%;
             display: flex;
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
         .btn-back {
             display: flex;
             align-items: center;
-            gap: 10px;
-            background: rgba(255, 255, 255, 0.3);
-            border: none;
-            padding: 8px 15px;
-            border-radius: 10px;
-            color: #2c2c2c;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.4);
+            padding: 8px 18px;
+            border-radius: 50px;
+            color: var(--text-dark);
             text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.5);
         }
 
         .btn-back:hover {
-            background: rgba(255, 255, 255, 0.5);
-            transform: translateX(-3px);
+            background: var(--white);
+            transform: translateX(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
-        .btn-back svg {
-            width: 20px;
-            height: 20px;
-            stroke: #2c2c2c;
-            fill: none;
-            stroke-width: 2.5;
+        .btn-back svg { width: 18px; height: 18px; stroke-width: 3; }
+
+        .store-logo {
+            font-family: 'Brush Script MT', cursive;
+            font-size: 30px;
+            color: var(--text-dark);
         }
 
-        .logo-section {
-            display: flex;
-            align-items: center;
-        }
-
-        .store-name {
-            font-family: 'Brush Script MT', 'Lucida Handwriting', cursive;
-            font-size: 28px;
-            color: #2c2c2c;
-            font-style: italic;
-            font-weight: bold;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        }
-
-        .hamburger {
-            display: none;
-            flex-direction: column;
-            gap: 5px;
-            cursor: pointer;
-            padding: 10px;
-            z-index: 1001;
-        }
-
-        .hamburger span {
-            width: 30px;
-            height: 3px;
-            background: #4a4a4a;
-            border-radius: 3px;
-            transition: all 0.3s;
-        }
-
-        .hamburger.active span:nth-child(1) {
-            transform: rotate(45deg) translate(8px, 8px);
-        }
-
-        .hamburger.active span:nth-child(2) {
-            opacity: 0;
-        }
-
-        .hamburger.active span:nth-child(3) {
-            transform: rotate(-45deg) translate(8px, -8px);
-        }
-
-        nav {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-            transition: all 0.3s;
-        }
-
-        nav a {
-            color: #4a4a4a;
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: 600;
-            transition: color 0.3s;
-        }
-
-        nav a:hover {
-            color: #2c2c2c;
-        }
-
-        .header-icons {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .icon-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-        }
-
-        .icon-btn {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #2c2c2c;
-            transition: transform 0.2s;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .icon-btn svg {
-            width: 26px;
-            height: 26px;
-            stroke: #2c2c2c;
-            fill: none;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        .icon-btn:hover {
-            transform: scale(1.1);
-        }
-
-        .icon-label {
-            font-size: 10px;
-            color: #4a4a4a;
-            font-weight: 600;
-        }
-
-        .icon-wrapper {
-            position: relative;
-        }
-
-        .cart-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #d32f2f;
-            color: white;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 11px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Profile Section */
+        /* CONTAINER */
         .profile-container {
-            max-width: 1200px;
-            margin: 50px auto;
-            padding: 0 50px;
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 30px;
+            max-width: 1200px; margin: 40px auto; padding: 0 20px;
+            display: grid; grid-template-columns: 320px 1fr; gap: 30px;
         }
 
-        /* Sidebar */
+        /* SIDEBAR */
         .profile-sidebar {
             background: linear-gradient(135deg, #d4b896 0%, #c9a882 100%);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            height: fit-content;
+            border-radius: 20px; padding: 30px; box-shadow: var(--shadow);
+            height: fit-content; text-align: center;
         }
 
+        .avatar-wrapper {
+            position: relative; width: 120px; height: 120px; margin: 0 auto 20px;
+        }
+        
         .profile-avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: #2c2c2c;
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            width: 100%; height: 100%; border-radius: 50%;
+            background: #444; overflow: hidden; border: 4px solid white;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        .profile-avatar svg {
-            width: 70px;
-            height: 70px;
-            stroke: white;
-            fill: none;
-            stroke-width: 2;
+        .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .upload-hint {
+            position: absolute; bottom: 0; right: 0;
+            background: var(--primary-brown); color: white;
+            width: 35px; height: 35px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; border: 2px solid white;
         }
 
-        .profile-name {
-            text-align: center;
-            font-size: 22px;
-            font-weight: 600;
-            color: #2c2c2c;
-            margin-bottom: 5px;
-        }
-
-        .profile-email {
-            text-align: center;
-            font-size: 14px;
-            color: #6b6b6b;
-            margin-bottom: 25px;
-        }
-
-        .profile-menu {
-            list-style: none;
-        }
-
-        .profile-menu li {
-            margin-bottom: 10px;
-        }
-
+        .profile-menu { list-style: none; margin-top: 25px; text-align: left; }
+        
         .profile-menu a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 15px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            text-decoration: none;
-            color: #2c2c2c;
-            font-weight: 600;
-            transition: all 0.3s;
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 15px; background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px; text-decoration: none; color: var(--text-dark);
+            font-weight: 600; margin-bottom: 10px; transition: 0.3s;
+        }
+        
+        .profile-menu a.active, .profile-menu a:hover { 
+            background: white; 
+            transform: translateX(8px); 
         }
 
-        .profile-menu a:hover, .profile-menu a.active {
-            background: white;
-            transform: translateX(5px);
-        }
-
-        .profile-menu svg {
-            width: 20px;
-            height: 20px;
-            stroke: #2c2c2c;
-            fill: none;
-            stroke-width: 2;
-        }
-
-        .btn-logout {
-            width: 100%;
-            margin-top: 20px;
-            padding: 12px;
-            background: #d32f2f;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-logout:hover {
-            background: #b71c1c;
-        }
-
-        /* Main Content */
+        /* CONTENT */
         .profile-content {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background: white; border-radius: 25px; padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
 
-        .content-section {
-            display: none;
-        }
-
-        .content-section.active {
-            display: block;
-        }
+        .content-section { display: none; animation: fadeIn 0.4s ease; }
+        .content-section.active { display: block; }
+        @keyframes fadeIn { from {opacity: 0; transform: translateY(10px);} to {opacity: 1; transform: translateY(0);} }
 
         .section-title {
-            font-size: 24px;
-            font-weight: 600;
-            color: #2c2c2c;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f5deb3;
+            font-size: 26px; color: var(--primary-brown);
+            margin-bottom: 30px; padding-bottom: 10px;
+            border-bottom: 3px solid var(--bg-original);
         }
 
-        /* Profile Info Form */
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: #4a4a4a;
-            margin-bottom: 8px;
-        }
-
+        /* FORMS */
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; }
+        
         .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 14px;
-            color: #2c2c2c;
-            transition: border-color 0.3s;
+            width: 100%; padding: 12px 15px; border: 2px solid #f0f0f0;
+            border-radius: 10px; transition: 0.3s;
         }
-
-        .form-control:focus {
-            outline: none;
-            border-color: #8b7355;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
+        
+        .form-control:focus { border-color: var(--primary-brown); outline: none; background: #fffcf8; }
 
         .btn-save {
-            background: #8b7355;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 10px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
+            background: var(--primary-brown); color: white;
+            border: none; padding: 14px 35px; border-radius: 10px;
+            cursor: pointer; font-weight: 700; transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(139, 115, 85, 0.3);
         }
 
-        .btn-save:hover {
-            background: #6b5845;
-        }
+        .btn-save:hover { background: var(--accent); transform: translateY(-2px); }
 
-        /* Order History */
-        .order-card {
-            background: #f5f5f0;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-left: 4px solid #8b7355;
-        }
-
-        .order-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .order-id {
-            font-size: 16px;
-            font-weight: 600;
-            color: #2c2c2c;
-        }
-
-        .order-status {
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .status-completed {
-            background: #4caf50;
-            color: white;
-        }
-
-        .status-processing {
-            background: #ff9800;
-            color: white;
-        }
-
-        .status-pending {
-            background: #9e9e9e;
-            color: white;
-        }
-
-        .order-items {
-            font-size: 14px;
-            color: #6b6b6b;
-            margin-bottom: 10px;
-        }
-
-        .order-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 10px;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        .order-date {
-            font-size: 13px;
-            color: #8b7355;
-        }
-
-        .order-total {
-            font-size: 16px;
-            font-weight: 600;
-            color: #2c2c2c;
-        }
-
-        /* Address Section */
-        .address-card {
-            background: #f5f5f0;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 15px;
-            position: relative;
-        }
-
-        .address-label {
-            display: inline-block;
-            background: #8b7355;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 5px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        .address-name {
-            font-size: 16px;
-            font-weight: 600;
-            color: #2c2c2c;
-            margin-bottom: 5px;
-        }
-
-        .address-phone {
-            font-size: 14px;
-            color: #6b6b6b;
-            margin-bottom: 10px;
-        }
-
-        .address-detail {
-            font-size: 14px;
-            color: #4a4a4a;
-            line-height: 1.6;
-        }
-
-        .btn-add-address {
-            width: 100%;
-            padding: 15px;
-            background: white;
-            border: 2px dashed #8b7355;
-            border-radius: 15px;
-            color: #8b7355;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-add-address:hover {
-            background: #f5f5f0;
-        }
-
-        /* Mobile Menu */
-        .menu-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-
-        .menu-overlay.active {
-            display: block;
-        }
+        #map { height: 350px; width: 100%; border-radius: 15px; border: 2px solid #f0f0f0; margin-top: 10px; }
 
         @media (max-width: 968px) {
-            .hamburger {
-                display: flex;
-            }
-
-            nav {
-                position: fixed;
-                top: 0;
-                right: -100%;
-                width: 300px;
-                height: 100vh;
-                background: linear-gradient(135deg, #d4b896 0%, #c9a882 100%);
-                flex-direction: column;
-                justify-content: flex-start;
-                padding: 80px 30px 30px;
-                box-shadow: -5px 0 15px rgba(0, 0, 0, 0.2);
-                z-index: 1000;
-            }
-
-            nav.active {
-                right: 0;
-            }
-
-            nav a {
-                font-size: 18px;
-                padding: 15px 0;
-                width: 100%;
-                border-bottom: 1px solid rgba(74, 74, 74, 0.2);
-            }
-
-            .profile-container {
-                grid-template-columns: 1fr;
-                padding: 0 20px;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .header-icons {
-                margin-left: auto;
-                gap: 10px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .profile-container { padding: 0 15px; margin: 20px auto; }
-            .profile-content { padding: 20px 15px; }
-            .profile-sidebar { padding: 20px 15px; }
-            .section-title { font-size: 20px; }
+            .profile-container { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <!-- Menu Overlay -->
-    <div class="menu-overlay" id="menuOverlay"></div>
 
-    <!-- Header -->
     <header>
         <div class="header-left">
             <a href="/" class="btn-back">
-                <svg viewBox="0 0 24 24">
-                    <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"></path></svg>
                 Kembali
             </a>
-            <div class="logo-section">
-                <span class="store-name">Toko kue kharisma</span>
-            </div>
         </div>
-        
-        <nav id="navMenu">
-            <a href="/">home</a>
-            <a href="/menu">menu</a>
-            <a href="/kontak">kontak</a>
-            <a href="/promo">promo</a>
-        </nav>
-
-        <div class="header-icons">
-            <div class="icon-wrapper">
-                <button type="button" class="icon-btn" title="Keranjang" onclick="window.location.href='/cart'">
-                    <svg viewBox="0 0 24 24">
-                        <circle cx="9" cy="21" r="1"></circle>
-                        <circle cx="20" cy="21" r="1"></circle>
-                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                    </svg>
-                    <span class="cart-badge" id="cartBadge">0</span>
-                </button>
-                <span class="icon-label">Keranjang</span>
-            </div>
-            <div class="icon-wrapper">
-                <button class="icon-btn" title="Profil" onclick="window.location.href='/profile'">
-                    <svg viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <circle cx="12" cy="10" r="3"></circle>
-                        <path d="M6.168 18.849A4 4 0 0 1 10 16h4a4 4 0 0 1 3.834 2.855"></path>
-                    </svg>
-                </button>
-                <span class="icon-label">Profil</span>
-            </div>
-            
-            <!-- Hamburger Menu -->
-            <div class="hamburger" id="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </div>
+        <div class="store-logo">Toko Kue Kharisma</div>
+        <div style="width: 100px;"></div>
     </header>
 
-    <!-- Profile Container -->
     <div class="profile-container">
-        <!-- Sidebar -->
         <aside class="profile-sidebar">
-            <div class="profile-avatar">
-                <svg viewBox="0 0 24 24">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                </svg>
+            <div class="avatar-wrapper">
+                <div class="profile-avatar" id="avatarPreview">
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name ?? 'Dandi Adrian') }}&background=8b7355&color=fff" alt="Avatar">
+                </div>
+                <label for="avatarInput" class="upload-hint">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                </label>
             </div>
-            <h2 class="profile-name">{{ $user->name ?? 'User' }}</h2>
-            <p class="profile-email">{{ $user->email ?? 'user@email.com' }}</p>
+            
+            <h2 id="sideName" style="font-weight: 800;">{{ $user->name ?? 'Dandi Adrian' }}</h2>
+            <p style="font-size: 13px; opacity: 0.8; margin-bottom: 20px;">Member Toko Kue Kharisma</p>
 
             <ul class="profile-menu">
-                <li>
-                    <a href="#" class="active" onclick="showSection('info')">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                        Informasi Profil
-                    </a>
-                </li>
-                <li>
-                    <a href="#" onclick="showSection('orders')">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-                            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-                        </svg>
-                        Riwayat Pesanan
-                    </a>
-                </li>
-                <li>
-                    <a href="#" onclick="showSection('address')">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                            <circle cx="12" cy="10" r="3"></circle>
-                        </svg>
-                        Alamat Pengiriman
-                    </a>
-                </li>
-                <li>
-                    <a href="#" onclick="showSection('settings')">
-                        <svg viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="3"></circle>
-                            <path d="M12 1v6m0 6v6m-9-9h6m6 0h6"></path>
-                        </svg>
-                        Pengaturan
-                    </a>
-                </li>
+                <li><a href="#info" onclick="showSection('info')" id="menu-info" class="active">Info Profil</a></li>
+                <li><a href="#orders" onclick="showSection('orders')" id="menu-orders">Riwayat Pesanan</a></li>
+                <li><a href="#address" onclick="showSection('address')" id="menu-address">Alamat Pengiriman</a></li>
+                <li><a href="#settings" onclick="showSection('settings')" id="menu-settings">Keamanan</a></li>
             </ul>
 
-            <form action="{{ route('logout') }}" method="POST">
+            <form action="{{ route('logout') }}" method="POST" style="margin-top: 20px;">
                 @csrf
-                <button type="submit" class="btn-logout">Keluar</button>
+                <button type="submit" style="width:100%; padding:12px; background:#d32f2f; color:white; border:none; border-radius:10px; cursor:pointer; font-weight:600;">Keluar Akun</button>
             </form>
         </aside>
 
-        <!-- Main Content -->
         <main class="profile-content">
-            <!-- Profile Info Section -->
             <section id="info" class="content-section active">
-                <h2 class="section-title">Informasi Profil</h2>
-                @if(session('success'))
-                    <div style="background:#e8f5e9;border:1px solid #4caf50;color:#2e7d32;padding:12px 16px;border-radius:10px;margin-bottom:20px;font-size:14px;">
-                        {{ session('success') }}
+                <h2 class="section-title">Informasi Lengkap Profil</h2>
+                <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
+                    @csrf @method('PUT')
+                    
+                    <input type="file" id="avatarInput" name="photo" style="display:none" accept="image/*">
+
+                    <div class="form-group">
+                        <label>Nama Lengkap</label>
+                        <input type="text" name="name" class="form-control" value="{{ $user->name ?? 'Dandi Adrian' }}">
                     </div>
-                @endif
-                @if($errors->any())
-                    <div style="background:#ffebee;border:1px solid #f44336;color:#c62828;padding:12px 16px;border-radius:10px;margin-bottom:20px;font-size:14px;">
-                        <ul style="margin:0;padding-left:18px;">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" name="email" class="form-control" value="{{ $user->email ?? 'dandi1@gmail.com' }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Nomor WhatsApp</label>
+                            <input type="text" name="phone" class="form-control" placeholder="0812xxxx" value="{{ $user->phone ?? '' }}">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tanggal Lahir</label>
+                            <input type="date" name="birthdate" class="form-control" value="{{ $user->birthdate ?? '' }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Jenis Kelamin</label>
+                            <select name="gender" class="form-control">
+                                <option value="Laki-laki" {{ ($user->gender ?? '') == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
+                                <option value="Perempuan" {{ ($user->gender ?? '') == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-save">Simpan Perubahan Profil</button>
+                </form>
+            </section>
+
+            <section id="address" class="content-section">
+                <h2 class="section-title">Alamat Pengiriman</h2>
+                <form action="{{ route('profile.update') }}" method="POST">
+                    @csrf @method('PUT')
+                    
+                    <div class="form-group">
+                        <label>Alamat Lengkap</label>
+                        <textarea id="address_text" name="address" class="form-control" rows="3" placeholder="Masukkan alamat lengkap atau cari di peta...">{{ $user->address ?? '' }}</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Titik Koordinat (Geser pin pada peta)</label>
+                        <div id="map"></div>
+                        <input type="hidden" name="latitude" id="lat" value="{{ $user->latitude ?? '' }}">
+                        <input type="hidden" name="longitude" id="lng" value="{{ $user->longitude ?? '' }}">
+                    </div>
+
+                    <button type="submit" class="btn-save">Simpan Alamat Saja</button>
+                </form>
+            </section>
+
+            <section id="settings" class="content-section">
+                <h2 class="section-title">Keamanan & Password</h2>
+                <form action="{{ route('profile.password') }}" method="POST">
+                    @csrf @method('PUT')
+                    
+                    <div class="form-group">
+                        <label>Password Lama</label>
+                        <input type="password" name="old_password" class="form-control" placeholder="Masukkan password saat ini">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Password Baru</label>
+                            <input type="password" name="password" class="form-control" placeholder="Minimal 8 karakter">
+                        </div>
+                        <div class="form-group">
+                            <label>Konfirmasi Password Baru</label>
+                            <input type="password" name="password_confirmation" class="form-control" placeholder="Ulangi password baru">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-save">Update Password</button>
+                </form>
+            </section>
+
+            <section id="orders" class="content-section">
+                <h2 class="section-title">Riwayat Pesanan</h2>
+                @forelse($orders as $order)
+                <div style="background: #f9f9f9; border-radius: 12px; padding: 20px; margin-bottom: 15px; border-left: 5px solid #8b7355;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span style="font-weight: 600; color: #2c2c2c;">{{ $order->order_number }}</span>
+                        <span style="font-size: 13px; background: 
+                            @if($order->status === 'pending') #ffc107
+                            @elseif($order->status === 'paid') #28a745
+                            @elseif($order->status === 'shipped') #17a2b8
+                            @else #6c757d
+                            @endif; 
+                            color: white; padding: 5px 12px; border-radius: 20px;">{{ ucfirst($order->status) }}</span>
+                    </div>
+                    <div style="font-size: 13px; color: #666; margin-bottom: 12px;">
+                        <p style="margin: 5px 0;"><strong>Tanggal:</strong> {{ $order->created_at->format('d M Y H:i') }}</p>
+                        <p style="margin: 5px 0;"><strong>Total:</strong> Rp {{ number_format($order->total, 0, ',', '.') }}</p>
+                        <p style="margin: 5px 0;"><strong>Metode Pembayaran:</strong> {{ ucfirst($order->payment_method) }}</p>
+                        <p style="margin: 5px 0;"><strong>Alamat:</strong> {{ $order->delivery_address }}</p>
+                    </div>
+                    <div style="padding-top: 10px; border-top: 1px solid #eee;">
+                        <strong style="font-size: 13px; color: #2c2c2c;">Item Pesanan:</strong>
+                        <ul style="margin: 8px 0 0 20px; font-size: 13px; color: #666;">
+                            @foreach($order->orderItems as $item)
+                            <li>{{ $item->product->name ?? 'Produk Terhapus' }} x{{ $item->quantity }} - Rp {{ number_format($item->subtotal, 0, ',', '.') }}</li>
                             @endforeach
                         </ul>
                     </div>
-                @endif
-                <form action="{{ route('profile.update') }}" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="name">Nama Lengkap</label>
-                            <input type="text" id="name" name="name" class="form-control" value="{{ old('name', $user->name) }}" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="email_display">Email</label>
-                            <input type="text" id="email_display" class="form-control" value="{{ $user->email }}" disabled style="background:#f5f5f0;color:#888;">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="phone">Nomor Telepon</label>
-                        <input type="tel" id="phone" name="phone" class="form-control" value="{{ old('phone', $user->phone ?? '') }}" placeholder="Contoh: 08123456789">
-                    </div>
-
-                    <button type="submit" class="btn-save">Simpan Perubahan</button>
-                </form>
-            </section>
-
-            <!-- Order History Section -->
-            <section id="orders" class="content-section">
-                <h2 class="section-title">Riwayat Pesanan</h2>
-
-                @forelse($orders->take(3) as $order)
-                <div class="order-card">
-                    <div class="order-header">
-                        <span class="order-id">#{{ $order->order_number }}</span>
-                        @php
-                            $statusMap = [
-                                'pending'     => ['label' => 'Menunggu Verifikasi', 'class' => 'status-pending'],
-                                'verified'    => ['label' => 'Diverifikasi',        'class' => 'status-processing'],
-                                'in_progress' => ['label' => 'Diproses',            'class' => 'status-processing'],
-                                'completed'   => ['label' => 'Selesai',             'class' => 'status-completed'],
-                                'cancelled'   => ['label' => 'Dibatalkan',          'class' => 'status-pending'],
-                            ];
-                            $s = $statusMap[$order->status] ?? ['label' => ucfirst($order->status), 'class' => 'status-pending'];
-                        @endphp
-                        <span class="order-status {{ $s['class'] }}">{{ $s['label'] }}</span>
-                    </div>
-                    <div class="order-items">
-                        @foreach($order->orderItems as $item)
-                            {{ $item->quantity }}x {{ $item->product->name ?? '-' }}<br>
-                        @endforeach
-                    </div>
-                    <div class="order-footer">
-                        <span class="order-date">{{ $order->created_at->format('d F Y') }}</span>
-                        <span class="order-total">Rp {{ number_format($order->total, 0, ',', '.') }}</span>
-                    </div>
                 </div>
                 @empty
-                <p style="color:#8b7355;font-size:15px;">Belum ada pesanan. <a href="/menu" style="color:#2c2c2c;font-weight:600;">Mulai belanja</a></p>
-                @endforelse
-
-                @if($orders->count() > 3)
-                <a href="{{ route('riwayat') }}" style="
-                    display: block;
-                    text-align: center;
-                    margin-top: 15px;
-                    padding: 12px;
-                    background: #f5f5f0;
-                    border-radius: 10px;
-                    color: #8b7355;
-                    font-weight: 600;
-                    font-size: 14px;
-                    text-decoration: none;
-                    transition: background 0.3s;
-                " onmouseover="this.style.background='#e8e0d0'" onmouseout="this.style.background='#f5f5f0'">
-                    Lihat Semua Pesanan ({{ $orders->count() }}) →
-                </a>
-                @endif
-            </section>
-
-            <!-- Address Section -->
-            <section id="address" class="content-section">
-                <h2 class="section-title">Alamat Pengiriman</h2>
-
-                @if(session('success') && request()->has('from_address'))
-                    <div style="background:#e8f5e9;border:1px solid #4caf50;color:#2e7d32;padding:12px 16px;border-radius:10px;margin-bottom:20px;font-size:14px;">
-                        Alamat berhasil disimpan.
-                    </div>
-                @endif
-
-                <form action="{{ route('profile.update') }}" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <input type="hidden" name="name" value="{{ $user->name }}">
-                    <input type="hidden" name="phone" value="{{ $user->phone ?? '' }}">
-
-                    <div class="form-group">
-                        <label for="address">Alamat Lengkap</label>
-                        <textarea id="address" name="address" class="form-control" rows="4"
-                            placeholder="Contoh: Jl. Merdeka No. 10, RT 01/RW 02, Kel. Sukamaju, Kec. Bogor Tengah, Kota Bogor, Jawa Barat 16110"
-                            style="resize:vertical;">{{ old('address', $user->address ?? '') }}</textarea>
-                        <p style="font-size:12px;color:#8b7355;margin-top:6px;">
-                            Alamat ini akan digunakan sebagai alamat pengiriman pesanan Anda.
-                        </p>
-                    </div>
-
-                    <button type="submit" class="btn-save">Simpan Alamat</button>
-                </form>
-
-                @if(empty($user->address))
-                <div style="margin-top:15px;padding:15px;background:#fff3e0;border:1px solid #f0c27b;border-radius:10px;font-size:14px;color:#6b4f1d;">
-                    ⚠️ Anda belum mengisi alamat pengiriman. Lengkapi alamat sebelum melakukan checkout.
+                <div style="text-align:center; padding:50px 0; border: 2px dashed #ddd; border-radius: 15px;">
+                    <p style="color: #999; font-weight: 600;">Belum ada pesanan yang ditemukan.</p>
                 </div>
-                @endif
-            </section>
-
-            <!-- Settings Section -->
-            <section id="settings" class="content-section">
-                <h2 class="section-title">Ubah Password</h2>
-                @if(session('password_success'))
-                    <div style="background:#e8f5e9;border:1px solid #4caf50;color:#2e7d32;padding:12px 16px;border-radius:10px;margin-bottom:20px;font-size:14px;">
-                        {{ session('password_success') }}
-                    </div>
-                @endif
-                @if(session('password_error'))
-                    <div style="background:#ffebee;border:1px solid #f44336;color:#c62828;padding:12px 16px;border-radius:10px;margin-bottom:20px;font-size:14px;">
-                        {{ session('password_error') }}
-                    </div>
-                @endif
-                <form action="{{ route('profile.password') }}" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <div class="form-group">
-                        <label for="current_password">Password Saat Ini</label>
-                        <input type="password" id="current_password" name="current_password" class="form-control" placeholder="Masukkan password saat ini" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="new_password">Password Baru</label>
-                        <input type="password" id="new_password" name="new_password" class="form-control" placeholder="Minimal 8 karakter" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="new_password_confirmation">Konfirmasi Password Baru</label>
-                        <input type="password" id="new_password_confirmation" name="new_password_confirmation" class="form-control" placeholder="Ulangi password baru" required>
-                    </div>
-
-                    <button type="submit" class="btn-save">Ubah Password</button>
-                </form>
+                @endforelse
             </section>
         </main>
     </div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Hamburger Menu Toggle
-        const hamburger = document.getElementById('hamburger');
-        const navMenu = document.getElementById('navMenu');
-        const menuOverlay = document.getElementById('menuOverlay');
-
-        hamburger.addEventListener('click', function() {
-            hamburger.classList.toggle('active');
-            navMenu.classList.toggle('active');
-            menuOverlay.classList.toggle('active');
-        });
-
-        menuOverlay.addEventListener('click', function() {
-            hamburger.classList.remove('active');
-            navMenu.classList.remove('active');
-            menuOverlay.classList.remove('active');
-        });
-
-        document.querySelectorAll('nav a').forEach(link => {
-            link.addEventListener('click', function() {
-                hamburger.classList.remove('active');
-                navMenu.classList.remove('active');
-                menuOverlay.classList.remove('active');
-            });
-        });
-
-        // Show Section
+        // Tab System
         function showSection(sectionId) {
-            event.preventDefault();
-            
-            // Hide all sections
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.classList.remove('active');
-            });
-
-            // Remove active from all menu items
-            document.querySelectorAll('.profile-menu a').forEach(link => {
-                link.classList.remove('active');
-            });
-
-            // Show selected section
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.profile-menu a').forEach(a => a.classList.remove('active'));
             document.getElementById(sectionId).classList.add('active');
-
-            // Add active to clicked menu item
-            event.target.closest('a').classList.add('active');
-        }
-
-        // Update cart badge
-        function updateCartBadge() {
-            const badge = document.getElementById('cartBadge');
-            if (badge) {
-                fetch('/api/cart/count')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.count !== undefined) {
-                            badge.textContent = data.count;
-                        }
-                    })
-                    .catch(error => console.error('Error fetching cart count:', error));
+            document.getElementById('menu-' + sectionId).classList.add('active');
+            if(sectionId === 'address') { 
+                setTimeout(() => { map.invalidateSize(); }, 300); 
             }
         }
 
-        // Load cart count on page load
+        // Preview Foto Profil
+        document.getElementById('avatarInput').addEventListener('change', function(e) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                document.getElementById('avatarPreview').innerHTML = `<img src="${reader.result}">`;
+            }
+            reader.readAsDataURL(e.target.files[0]);
+        });
+
+        // Map System
+        let map, marker;
         document.addEventListener('DOMContentLoaded', function() {
-            updateCartBadge();
+            const savedLat = parseFloat(document.getElementById('lat').value) || -6.5971;
+            const savedLng = parseFloat(document.getElementById('lng').value) || 106.8060;
 
-            // Auto-buka tab sesuai hash URL (misal /profile#address)
-            const hash = window.location.hash.replace('#', '');
-            if (hash && document.getElementById(hash)) {
-                // Sembunyikan semua section
-                document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-                document.querySelectorAll('.profile-menu a').forEach(a => a.classList.remove('active'));
-                // Tampilkan section yang diminta
-                document.getElementById(hash).classList.add('active');
-                // Aktifkan menu item yang sesuai
-                const menuLink = document.querySelector(`.profile-menu a[onclick*="'${hash}'"]`);
-                if (menuLink) menuLink.classList.add('active');
+            map = L.map('map').setView([savedLat, savedLng], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            marker = L.marker([savedLat, savedLng], {draggable: true}).addTo(map);
+
+            function updateCoords(lat, lng) {
+                document.getElementById('lat').value = lat;
+                document.getElementById('lng').value = lng;
             }
+
+            marker.on('dragend', function() {
+                const pos = marker.getLatLng();
+                updateCoords(pos.lat, pos.lng);
+            });
+
+            map.on('click', (e) => {
+                marker.setLatLng(e.latlng);
+                updateCoords(e.latlng.lat, e.latlng.lng);
+            });
+
+            // Auto Search Alamat
+            let timer;
+            document.getElementById('address_text').addEventListener('input', function() {
+                clearTimeout(timer);
+                timer = setTimeout(async () => {
+                    const query = this.value;
+                    if (query.length < 5) return;
+                    try {
+                        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+                        const data = await res.json();
+                        if (data.length > 0) {
+                            const { lat, lon } = data[0];
+                            map.setView([lat, lon], 16);
+                            marker.setLatLng([lat, lon]);
+                            updateCoords(lat, lon);
+                        }
+                    } catch (e) { console.error(e); }
+                }, 1000);
+            });
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Notifikasi Sukses (Profil, Alamat, Password)
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: "{{ session('success') }}",
+                showConfirmButton: false,
+                timer: 2500,
+                background: '#f5deb3',
+                iconColor: '#8b7355'
+            });
+        @endif
+
+        // Notifikasi Password Salah
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: "{{ session('error') }}",
+                confirmButtonColor: '#8b7355'
+            });
+        @endif
+    });
+</script>
 </body>
 </html>
