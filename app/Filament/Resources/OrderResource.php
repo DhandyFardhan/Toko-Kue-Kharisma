@@ -204,6 +204,14 @@ class OrderResource extends Resource
                     ->action(fn (Order $record) => $record->update(['status' => 'cancelled']))
                     ->visible(fn (Order $record) => in_array($record->status, ['pending', 'verified'])),
 
+                Tables\Actions\DeleteAction::make()
+                    ->label('Hapus')
+                    ->icon('heroicon-o-trash')
+                    ->requiresConfirmation()
+                    ->modalHeading('Hapus Pesanan')
+                    ->modalDescription('Pesanan yang dibatalkan akan dihapus dari sistem. Tindakan ini tidak dapat dikembalikan.')
+                    ->visible(fn (Order $record) => $record->status === 'cancelled'),
+
                 Tables\Actions\ViewAction::make()->label('Detail'),
             ])
             ->bulkActions([]);

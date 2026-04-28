@@ -1687,7 +1687,7 @@ function checkout() {
                 btn.disabled = true;
 
                 // Ambil catatan dari form checkout
-                const notes = document.querySelector('#checkoutForm textarea[name="notes"]')?.value || '';
+                const notes = document.querySelector('#checkoutForm input[name="notes"]')?.value || '';
 
                 try {
                     // 1) Buat order dulu

@@ -68,18 +68,21 @@ class OrderController extends Controller
 
             $orderNumber = 'ORD-' . strtoupper(uniqid());
 
-            $order = Order::create([
-                'order_number'     => $orderNumber,
-                'user_id'          => $user->id,
-                'subtotal'         => $subtotal,
-                'shipping_cost'    => $shippingCost,
-                'discount'         => $discount,
-                'total'            => $total,
-                'payment_method'   => $request->payment_method,
-                'notes'            => $request->notes,
-                'delivery_address' => $userAddress,
-                'status'           => 'pending',
-            ]);
+            // Status otomatis untuk COD dan QRIS (langsung in_progress), pending untuk metode pembayaran lain
+            $status = in_array($request->payment_method, ['cod', 'qris']) ? 'in_progress' : 'pending';
+
+$order = Order::create([
+    'order_number'     => $orderNumber,
+    'user_id'          => $user->id,
+    'subtotal'         => $subtotal,
+    'shipping_cost'    => $shippingCost,
+    'discount'         => $discount,
+    'total'            => $total,
+    'payment_method'   => $request->payment_method,
+    'notes'            => $request->notes,
+    'delivery_address' => $userAddress,
+    'status'           => $status, 
+]);
 
             foreach ($cartItems as $item) {
                 $itemPrice = $item->price ?? $item->product->price;
@@ -117,8 +120,9 @@ class OrderController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Pesanan berhasil dibuat (COD)',
+                'message' => 'Pesanan berhasil dibuat! Pesanan sedang diproses. Terimakasih atas pembelian Anda 🙏',
                 'order_number' => $order->order_number,
+                'status' => 'in_progress',
             ]);
 
         } catch (\Throwable $e) {
@@ -134,21 +138,31 @@ class OrderController extends Controller
     private function processQrisPayment($order, $user, $cartItems, $shippingCost)
     {
         // Konfigurasi Midtrans (Sesuai Dashboard)
-        $serverKey = config('services.midtrans.server_key') ?? 'Mid-server-M-KhvSN5ZIiU-zxjdlMKZkOV';
-        $clientKey = config('services.midtrans.client_key') ?? 'Mid-client-uWWcBH2KzsJhMH1_';
+        $serverKey = config('services.midtrans.server_key');
+$clientKey = config('services.midtrans.client_key');
+        $isProduction = config('services.midtrans.is_production', false);
 
         try {
+            // Validasi keys
+            if (empty($serverKey) || empty($clientKey)) {
+                Log::error('Midtrans keys missing', ['serverKey' => !empty($serverKey), 'clientKey' => !empty($clientKey)]);
+                throw new \Exception('Midtrans configuration incomplete');
+            }
+
+            // Konfigurasi Midtrans
             MidtransConfig::$serverKey = $serverKey;
-            MidtransConfig::$isProduction = config('services.midtrans.is_production', false);
+            MidtransConfig::$isProduction = $isProduction;
             MidtransConfig::$isSanitized = true;
             MidtransConfig::$is3ds = true;
             
-            // Solusi Error 10023: Paksa IPv4 dan Bypass SSL Localhost
-            MidtransConfig::$curlOptions = [
-                CURLOPT_SSL_VERIFYPEER => false,
-                CURLOPT_SSL_VERIFYHOST => 0,
-                CURLOPT_IPRESOLVE      => CURL_IPRESOLVE_V4,
-            ];
+            // Solusi Error 10023: Paksa IPv4 dan Bypass SSL Localhost (untuk development)
+            if (!$isProduction) {
+                MidtransConfig::$curlOptions = [
+                    CURLOPT_SSL_VERIFYPEER => false,
+                    CURLOPT_SSL_VERIFYHOST => 0,
+                    CURLOPT_IPRESOLVE      => CURL_IPRESOLVE_V4,
+                ];
+            }
 
             $item_details = [];
             $packageMapping = [
@@ -183,21 +197,53 @@ class OrderController extends Controller
                 'name'     => 'Ongkos Kirim',
             ];
 
+            // Validasi total item vs gross amount
+            $itemTotal = array_reduce($item_details, function ($sum, $item) {
+                return $sum + ($item['price'] * $item['quantity']);
+            }, 0);
+
+            if ($itemTotal != (int)$order->total) {
+                Log::warning('Item total mismatch', [
+                    'itemTotal' => $itemTotal,
+                    'orderTotal' => $order->total
+                ]);
+            }
+
             $params = [
                 'transaction_details' => [
                     'order_id'     => $order->order_number . '-' . time(),
-                    'gross_amount' => (int)$order->total, 
+                    'gross_amount' => (int)$order->total,
                 ],
                 'customer_details' => [
-                    'first_name' => (string) ($user->name ?? 'Customer'),
-                    'email'      => (string) ($user->email ?? 'customer@mail.com'),
-                    'phone'      => (string) ($user->phone ?? '08123456789'),
+                    'first_name' => $user->name ?? 'Pelanggan',
+                    'email'      => $user->email ?? 'customer@mail.com',
+                    'phone'      => $user->phone ?? '08123456789',
                 ],
                 'item_details' => $item_details,
-                'enabled_payments' => ['qris'],
-            ];
+                // Biarkan semua payment method tersedia (QRIS, e-wallet, transfer bank, dll)
+                // Jika ingin hanya QRIS: uncomment baris bawah
+                // 'enabled_payments' => ['qris'],
+               'callbacks' => [
+        'finish' => 'http://127.0.0.1:8000/riwayat',
+        'error'  => 'http://127.0.0.1:8000/riwayat',
+        'pending'=> 'http://127.0.0.1:8000/riwayat',
+    ],
+];
 
-            $snapToken = Snap::getSnapToken($params);
+            Log::info('Midtrans request params', [
+                'order_id' => $params['transaction_details']['order_id'],
+                'amount' => $params['transaction_details']['gross_amount'],
+                'items' => count($item_details)
+            ]);
+
+            // Coba generate Snap Token dengan error handling
+            $snapToken = @Snap::getSnapToken($params);
+
+            if (!$snapToken) {
+                throw new \Exception('Failed to generate Snap token - empty response');
+            }
+
+            Log::info('Snap token generated successfully', ['order' => $order->order_number]);
 
             return response()->json([
                 'success'             => true,
@@ -207,11 +253,18 @@ class OrderController extends Controller
                 'order_number'        => $order->order_number,
             ]);
 
-        } catch (\Throwable $e) {
-            Log::error('MIDTRANS API ERROR: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            $errorMsg = $e->getMessage();
+            Log::error('MIDTRANS ERROR', [
+                'message' => $errorMsg,
+                'code' => $e->getCode(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+            
             return response()->json([
                 'success' => false, 
-                'message' => 'Koneksi Midtrans Gagal: ' . $e->getMessage()
+                'message' => 'Koneksi Midtrans gagal: ' . $errorMsg
             ], 500);
         }
     }
