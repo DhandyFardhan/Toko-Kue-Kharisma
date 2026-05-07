@@ -872,12 +872,13 @@
                 </div>
             </div>
             
-            <nav id="navMenu">
-                <a href="/">home</a>
-                <a href="/menu">menu</a>
-                <a href="/kontak">kontak</a>
-                <a href="/promo">promo</a>
-            </nav>
+        <nav id="navMenu">
+    <a href="/" class="{{ Request::is('/') ? 'active' : '' }}">Home</a>
+    <a href="/menu" class="{{ Request::is('menu') ? 'active' : '' }}">Menu</a>
+    <a href="/riwayat" class="{{ Request::is('riwayat') ? 'active' : '' }}">Riwayat</a>
+    <a href="/kontak" class="{{ Request::is('kontak') ? 'active' : '' }}">Kontak</a>
+    <a href="/promo" class="{{ Request::is('promo') ? 'active' : '' }}">Promo</a>
+</nav>
 
             <div class="header-icons">
                 <div class="icon-wrapper">
@@ -1757,10 +1758,12 @@ function checkout() {
 
                         window.snap.pay(checkoutData.snap_token, {
                             onSuccess: function () {
-                                showNotification('Pembayaran berhasil. Menunggu webhook Midtrans...', 'success');
+                                showNotification('Pembayaran berhasil. Mengarahkan ke riwayat...', 'success');
+                                window.location.href = '/riwayat';
                             },
                             onPending: function () {
-                                showNotification('Menunggu pembayaran...', 'info');
+                                showNotification('Menunggu pembayaran... Mengarahkan ke riwayat.', 'info');
+                                window.location.href = '/riwayat';
                             },
                             onError: function () {
                                 showNotification('Pembayaran gagal. Silakan coba lagi.', 'error');

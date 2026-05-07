@@ -12,14 +12,15 @@
             box-sizing: border-box;
         }
 
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            background: #f5deb3;
-        }
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #F3DEBA; /* Warna krem hangat halaman home */
+}
 
         /* Header */
         header {
-            background: linear-gradient(135deg, #d4b896 0%, #c9a882 100%);
+            background: linear-gradient(135deg, rgba(212, 184, 150, 0.95) 0%, rgba(201, 168, 130, 0.95) 100%);
+    backdrop-filter: blur(8px); /* Memberikan efek kaca */
             padding: 15px clamp(15px, 4vw, 50px);
             display: flex;
             justify-content: space-between;
@@ -70,14 +71,27 @@
             align-items: center;
         }
 
-        .store-name {
-            font-family: 'Brush Script MT', 'Lucida Handwriting', cursive;
-            font-size: 28px;
-            color: #2c2c2c;
-            font-style: italic;
-            font-weight: bold;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        }
+       /* Cari bagian ini di dalam tag <style> */
+.store-name {
+    font-family: 'Brush Script MT', 'Lucida Handwriting', cursive;
+    font-size: 28px;
+    color: #2c2c2c;
+    font-style: italic;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    
+    /* TAMBAHKAN BARIS INI */
+    transition: all 0.3s ease;
+    cursor: default;
+    display: inline-block;
+}
+
+/* TAMBAHKAN BLOK BARU INI DI BAWAHNYA */
+.store-name:hover {
+    transform: skewX(-10deg) scale(1.05); /* Miring + sedikit membesar */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    color: #5d4d3c; /* Sedikit berubah warna saat hover */
+}
 
         .hamburger {
             display: none;
@@ -109,23 +123,66 @@
             transform: rotate(-45deg) translate(8px, -8px);
         }
 
-        nav {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-            transition: all 0.3s;
-        }
+       /* Update Navigasi agar lebih hidup */
+nav {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
 
+/* Gaya dasar link nav */
         nav a {
             color: #4a4a4a;
             text-decoration: none;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
-            transition: color 0.3s;
+            text-transform: capitalize; /* Biar huruf depan otomatis gede */
+            position: relative; /* Penting untuk efek underline */
+            padding: 5px 0;
+            transition: color 0.3s ease;
         }
 
-        nav a:hover, nav a.active {
+        /* Efek Underline yang mengalir dari tengah */
+        nav a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: #8b7355;
+            transition: all 0.3s ease-in-out;
+            transform: translateX(-50%);
+        }
+
+        /* Warna & Underline saat Hover */
+        nav a:hover {
             color: #2c2c2c;
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        /* Gaya untuk link yang sedang aktif (Kontak) */
+        nav a.active {
+            color: #8b7355;
+        }
+
+        nav a.active::after {
+            width: 80%; /* Garis bawah tetap ada di menu aktif */
+            background-color: #8b7355;
+        }
+
+        /* Tambahan: Sedikit animasi floating biar lebih 'hidup' */
+        @keyframes navFloat {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-2px); }
+            100% { transform: translateY(0); }
+        }
+
+        nav a:hover {
+            animation: navFloat 1s ease-in-out infinite;
         }
 
         .header-icons {
@@ -208,17 +265,29 @@
             margin-bottom: 40px;
         }
 
-        .menu-title {
-            font-size: 32px;
-            color: #2c2c2c;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
+      .menu-title {
+    font-family: 'Georgia', serif; /* Pakai serif biar lebih elegan */
+    font-size: 38px;
+    position: relative;
+    display: inline-block;
+    padding-bottom: 10px;
+}
 
-        .menu-subtitle {
-            font-size: 16px;
-            color: #8b7355;
-        }
+.menu-title::after {
+    content: '🍰'; /* Ikon kue kecil sebagai pemanis */
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+}
+
+/* Tambahkan garis di bawah subtitle */
+.menu-subtitle {
+    margin-top: 15px;
+    font-style: italic;
+    opacity: 0.8;
+}
 
         /* Category Filter */
         .category-filter {
@@ -359,35 +428,42 @@
             cursor: not-allowed;
             transform: none;
         }
-
-     .product-card {
-    background: linear-gradient(135deg, #d4b896 0%, #c9a882 100%);
+.product-card {
+    /* Menggunakan warna cokelat muda/tan dari home */
+    background: #D9C19D; 
+    border: none; /* Hilangkan border agar lebih clean seperti home */
     border-radius: 20px;
     padding: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); /* Bayangan awal lebih tipis */
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Efek membal */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     cursor: pointer;
     position: relative;
     overflow: hidden;
 }
 
 .product-card:hover {
-    transform: translateY(-10px); /* Naik lebih tinggi */
-    box-shadow: 0 15px 30px rgba(139, 115, 85, 0.3); /* Bayangan berwarna kecokelatan */
+    transform: translateY(-8px);
+    background: #E4D0B2; 
+    /* Bayangan hitam yang lebih tegas di sekeliling kartu */
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.8), 0 15px 35px rgba(0, 0, 0, 0.2);
+    border-color: transparent; /* Supaya tidak bertabrakan dengan shadow */
 }
-
-        .product-image-container {
-            background: white;
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 15px;
-            height: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
+.product-card:active {
+    transform: scale(0.96) translateY(-4px); /* Kartu seolah tertekan ke dalam */
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.9); /* Garis hitam jadi lebih tebal */
+    transition: all 0.1s ease;
+}
+ .product-image-container {
+    background: #FFFFFF;
+    border-radius: 15px;
+    padding: 10px;
+    margin-bottom: 15px;
+    height: 180px; /* Sedikit lebih pendek agar proporsional */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
         .product-image {
             max-width: 100%;
             max-height: 100%;
@@ -425,28 +501,27 @@
             justify-content: center;
             align-items: center;
         }
+.btn-add-cart {
+    background: #8B735B; /* Cokelat tua khas Toko Kue Kharisma */
+    border: none;
+    border-radius: 25px;
+    padding: 10px 20px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s;
+    width: 100%; /* Agar tombol memenuhi lebar kartu */
+}
 
-        .btn-add-cart {
-            background: #8b7355;
-            border: none;
-            border-radius: 25px;
-            padding: 10px 20px;
-            color: white;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.3s;
-        }
-
-        .btn-add-cart:hover {
-            background: #6b5845;
-            transform: scale(1.05);
-        }
-
+.btn-add-cart:hover {
+    background: #7A6652;
+    transform: scale(1.02);
+}
         .btn-add-cart svg {
             width: 18px;
             height: 18px;
@@ -626,6 +701,17 @@
 .product-card:nth-child(3) { animation-delay: 0.3s; }
 .product-card:nth-child(4) { animation-delay: 0.4s; }
         
+.store-name {
+    /* ... kode lama kamu ... */
+    transition: all 0.3s ease;
+    cursor: default;
+    display: inline-block;
+}
+
+.store-name:hover {
+    transform: skewX(-5deg); /* Sedikit miring gaya kaligrafi saat di-hover */
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
     </style>
 </head>
 <body>
@@ -643,12 +729,13 @@
             </div>
         </div>
         
-        <nav id="navMenu">
-            <a href="/">home</a>
-            <a href="/menu" class="active">menu</a>
-            <a href="/kontak">kontak</a>
-            <a href="/promo">promo</a>
-        </nav>
+<nav id="navMenu">
+    <a href="/" class="{{ Request::is('/') ? 'active' : '' }}">home</a>
+    <a href="/menu" class="{{ Request::is('menu') ? 'active' : '' }}">menu</a>
+    <a href="/riwayat" class="{{ Request::is('riwayat') ? 'active' : '' }}">riwayat</a>
+    <a href="/kontak" class="{{ Request::is('kontak') ? 'active' : '' }}">kontak</a>
+    <a href="/promo" class="{{ Request::is('promo') ? 'active' : '' }}">promo</a>
+</nav>
 
         <div class="header-icons">
             <div class="icon-wrapper">

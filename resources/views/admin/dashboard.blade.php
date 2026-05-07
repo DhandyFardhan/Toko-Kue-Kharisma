@@ -352,7 +352,10 @@
             background: #e8f5e9;
             color: #388e3c;
         }
-
+.status-badge.shipping {
+    background: #e1f5fe; /* Biru muda */
+    color: #0288d1;      /* Biru tua */
+}
         .action-btns {
             display: flex;
             gap: 8px;
@@ -592,6 +595,7 @@
                                 $statusClass = match($order->status) {
                                     'pending' => 'pending',
                                     'verified' => 'process',
+                                    'shipping' => 'shipping',
                                     'completed' => 'completed',
                                     default => 'pending',
                                 };
@@ -599,19 +603,30 @@
                             <span class="status-badge {{ $statusClass }}">{{ ucfirst($order->status) }}</span>
                         </td>
                         <td>
-                            <div class="action-btns">
-                                <a href="/admin/pesanan-baru" class="btn-action btn-edit">Detail</a>
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="6" style="text-align:center;">Tidak ada pesanan terbaru.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+             <div class="action-btns">
+    <!-- Tombol Detail selalu tampil -->
+    <a href="/admin/order/{{ $order->id }}" class="btn-action btn-edit">Detail</a>
+
+    @if($order->status == 'verified')
+        <!-- Tombol untuk mengubah dari Diproses ke Dikirim -->
+        <form action="{{ route('admin.updateStatus', $order->id) }}" method="POST" style="display:inline;">
+            @csrf
+            <input type="hidden" name="status" value="shipping">
+            <button type="submit" class="btn-action" style="background: #0288d1; color: white;">Kirim</button>
+        </form>
+    @elseif($order->status == 'shipping')
+        <!-- Tombol untuk mengubah dari Dikirim ke Selesai -->
+        <form action="{{ route('admin.updateStatus', $order->id) }}" method="POST" style="display:inline;">
+            @csrf
+            <input type="hidden" name="status" value="completed">
+            <button type="submit" class="btn-action" style="background: #388e3c; color: white;">Selesaikan</button>
+        </form>
+    @endif
+
+    @if($order->status == 'pending')
+        <button class="btn-action btn-delete">Batalkan</button>
+    @endif
+</div>
 
         <!-- Products Section -->
         <div class="content-section" id="products">
@@ -684,6 +699,7 @@
                                 $statusClass = match($order->status) {
                                     'pending' => 'pending',
                                     'verified' => 'process',
+                                    'shipping'  => 'Dikirim',
                                     'completed' => 'completed',
                                     default => 'pending',
                                 };
@@ -694,6 +710,7 @@
                             <div class="action-btns">
                                 <button class="btn-action btn-edit">Detail</button>
                                 <button class="btn-action btn-delete">Batalkan</button>
+
                             </div>
                         </td>
                     </tr>

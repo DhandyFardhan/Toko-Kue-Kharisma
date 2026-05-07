@@ -9,7 +9,10 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::all();
+        // Tampilkan semua produk kecuali paket promo
+        $products = Product::where('category', '!=', 'Paket Promo')
+                           ->orderBy('id', 'asc')
+                           ->get();
 
         $cartCount = 0;
         if (auth()->check()) {

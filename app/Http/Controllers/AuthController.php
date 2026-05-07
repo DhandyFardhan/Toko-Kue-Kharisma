@@ -17,7 +17,11 @@ class AuthController extends Controller
      */
     public function showHome()
     {
-        $products = Product::take(4)->get();
+        // Tampilkan 4 produk pertama (exclude paket promo)
+        $products = Product::where('category', '!=', 'Paket Promo')
+                           ->orderBy('id', 'asc')
+                           ->take(4)
+                           ->get();
         $reviews  = Review::latest()->take(10)->get();
         $totalReviews = Review::count();
         return view('home', compact('products', 'reviews', 'totalReviews'));

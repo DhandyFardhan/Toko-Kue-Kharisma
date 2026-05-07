@@ -79,45 +79,59 @@
             transition: all 0.3s;
         }
 
+      /* Gaya dasar link nav */
         nav a {
             color: #4a4a4a;
             text-decoration: none;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
-            transition: all 0.3s ease;
-            position: relative;
-            padding: 8px 15px;
-            border-radius: 8px;
+            text-transform: capitalize; /* Biar huruf depan otomatis gede */
+            position: relative; /* Penting untuk efek underline */
+            padding: 5px 0;
+            transition: color 0.3s ease;
         }
 
+        /* Efek Underline yang mengalir dari tengah */
         nav a::after {
             content: '';
             position: absolute;
-            bottom: -2px;
-            left: 0;
             width: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #8b7355, #c9a882);
-            transition: width 0.3s ease;
-            border-radius: 3px;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: #8b7355;
+            transition: all 0.3s ease-in-out;
+            transform: translateX(-50%);
         }
 
+        /* Warna & Underline saat Hover */
         nav a:hover {
             color: #2c2c2c;
-            background: rgba(139, 115, 85, 0.1);
         }
 
         nav a:hover::after {
             width: 100%;
         }
 
+        /* Gaya untuk link yang sedang aktif (Kontak) */
         nav a.active {
-            color: #2c2c2c;
-            background: rgba(139, 115, 85, 0.2);
+            color: #8b7355;
         }
 
         nav a.active::after {
-            width: 100%;
+            width: 80%; /* Garis bawah tetap ada di menu aktif */
+            background-color: #8b7355;
+        }
+
+        /* Tambahan: Sedikit animasi floating biar lebih 'hidup' */
+        @keyframes navFloat {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-2px); }
+            100% { transform: translateY(0); }
+        }
+
+        nav a:hover {
+            animation: navFloat 1s ease-in-out infinite;
         }
 
         .header-icons {
@@ -1089,6 +1103,52 @@
     opacity: 1;
     transform: translateY(0);
 }
+/* Efek kartu produk biar interaktif */
+.product-card {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Biar ada efek mantul (bounce) dikit */
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+/* Saat muncul lewat scroll */
+.product-card.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.product-card:hover {
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: 0 20px 30px rgba(0,0,0,0.15);
+    background: linear-gradient(135deg, #dfc4a3 0%, #d4b896 100%);
+}
+
+/* Animasi Gambar biar nge-zoom di dalam kartu */
+.product-image-container {
+    overflow: hidden; /* Wajib ada ini */
+}
+
+.product-image {
+    transition: transform 0.5s ease;
+}
+
+.product-card:hover .product-image {
+    transform: scale(1.1) rotate(2deg); /* Ngezoom sambil miring dikit biar asik */
+}
+
+/* Animasi Tombol pas diklik */
+.btn-add-cart:active {
+    transform: scale(0.9);
+}
+/* Logo goyang dikit pas dihover */
+.store-name:hover {
+    animation: wiggle 0.5s ease-in-out;
+}
+
+@keyframes wiggle {
+    0%, 100% { transform: rotate(0); }
+    25% { transform: rotate(-3deg); }
+    75% { transform: rotate(3deg); }
+}
     </style>
 </head>
 <body>
@@ -1101,14 +1161,12 @@
             <span class="store-name">Toko kue kharisma</span>
         </div>
         
-        <nav id="navMenu">
-    <a href="/">home</a>
-    <a href="/menu">menu</a>
-    <a href="/kontak">kontak</a>
-    <a href="/promo">promo</a>
-    @auth
-        <a href="/riwayat">riwayat</a>
-    @endauth
+ <nav id="navMenu">
+    <a href="/" class="{{ Request::is('/') ? 'active' : '' }}">home</a>
+    <a href="/menu" class="{{ Request::is('menu') ? 'active' : '' }}">menu</a>
+    <a href="/riwayat" class="{{ Request::is('riwayat') ? 'active' : '' }}">riwayat</a>
+    <a href="/kontak" class="{{ Request::is('kontak') ? 'active' : '' }}">kontak</a>
+    <a href="/promo" class="{{ Request::is('promo') ? 'active' : '' }}">promo</a>
 </nav>
 
         <div class="header-icons">
@@ -1715,6 +1773,29 @@ const observer = new IntersectionObserver((entries) => {
 document.querySelectorAll('.fade-up').forEach(el => {
     observer.observe(el);
 });
+</script>
+<script>
+    // Inisialisasi Observer
+    const observerOptions = {
+        threshold: 0.2 // Muncul kalau 20% elemen udah masuk layar
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+            if (entry.isIntersecting) {
+                // Kasih delay dikit tiap kartu biar munculnya gantian (staggered)
+                setTimeout(() => {
+                    entry.target.classList.add('show');
+                }, index * 100); 
+                observer.unobserve(entry.target); // Cukup animasiin sekali aja
+            }
+        });
+    }, observerOptions);
+
+    // Targetkan semua kartu produk
+    document.querySelectorAll('.product-card').forEach((card) => {
+        observer.observe(card);
+    });
 </script>
 </body>
 </html>

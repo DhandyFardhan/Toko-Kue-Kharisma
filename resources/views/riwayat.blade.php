@@ -46,8 +46,60 @@
         .hamburger span { width: 30px; height: 3px; background: #4a4a4a; border-radius: 3px; transition: all 0.3s; }
 
         nav { display: flex; gap: 30px; align-items: center; transition: all 0.3s; }
-        nav a { color: #4a4a4a; text-decoration: none; font-size: 15px; font-weight: 600; transition: color 0.3s; }
-        nav a:hover { color: #2c2c2c; }
+        /* Gaya dasar link nav */
+        nav a {
+            color: #4a4a4a;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: capitalize; /* Biar huruf depan otomatis gede */
+            position: relative; /* Penting untuk efek underline */
+            padding: 5px 0;
+            transition: color 0.3s ease;
+        }
+
+        /* Efek Underline yang mengalir dari tengah */
+        nav a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: #8b7355;
+            transition: all 0.3s ease-in-out;
+            transform: translateX(-50%);
+        }
+
+        /* Warna & Underline saat Hover */
+        nav a:hover {
+            color: #2c2c2c;
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        /* Gaya untuk link yang sedang aktif (Kontak) */
+        nav a.active {
+            color: #8b7355;
+        }
+
+        nav a.active::after {
+            width: 80%; /* Garis bawah tetap ada di menu aktif */
+            background-color: #8b7355;
+        }
+
+        /* Tambahan: Sedikit animasi floating biar lebih 'hidup' */
+        @keyframes navFloat {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-2px); }
+            100% { transform: translateY(0); }
+        }
+
+        nav a:hover {
+            animation: navFloat 1s ease-in-out infinite;
+        }
 
         .header-icons { display: flex; gap: 20px; align-items: center; }
         .icon-wrapper { display: flex; flex-direction: column; align-items: center; gap: 3px; position: relative; }
@@ -171,6 +223,7 @@
             .page-title { font-size: 22px; }
             .order-card { padding: 15px; }
         }
+        
     </style>
 </head>
 <body>
@@ -187,13 +240,20 @@
                 <span class="store-name">Toko kue kharisma</span>
             </div>
         </div>
+        <div class="hamburger" id="hamburger">
+    <span></span>
+    <span></span>
+    <span></span>
+</div>
+<div class="menu-overlay" id="menuOverlay"></div>
         
-        <nav id="navMenu">
-            <a href="/">home</a>
-            <a href="/menu">menu</a>
-            <a href="/kontak">kontak</a>
-            <a href="/promo">promo</a>
-        </nav>
+<nav id="navMenu">
+    <a href="/" class="{{ Request::is('/') ? 'active' : '' }}">home</a>
+    <a href="/menu" class="{{ Request::is('menu') ? 'active' : '' }}">menu</a>
+    <a href="/riwayat" class="{{ Request::is('riwayat') ? 'active' : '' }}">riwayat</a>
+    <a href="/kontak" class="{{ Request::is('kontak') ? 'active' : '' }}">kontak</a>
+    <a href="/promo" class="{{ Request::is('promo') ? 'active' : '' }}">promo</a>
+</nav>
 
         <div class="header-icons">
             <div class="icon-wrapper">

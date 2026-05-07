@@ -112,18 +112,60 @@
             transition: all 0.3s;
         }
 
+      /* Gaya dasar link nav */
         nav a {
             color: #4a4a4a;
             text-decoration: none;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
-            transition: color 0.3s;
+            text-transform: capitalize; /* Biar huruf depan otomatis gede */
+            position: relative; /* Penting untuk efek underline */
+            padding: 5px 0;
+            transition: color 0.3s ease;
         }
 
-        nav a:hover, nav a.active {
+        /* Efek Underline yang mengalir dari tengah */
+        nav a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: #8b7355;
+            transition: all 0.3s ease-in-out;
+            transform: translateX(-50%);
+        }
+
+        /* Warna & Underline saat Hover */
+        nav a:hover {
             color: #2c2c2c;
         }
 
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        /* Gaya untuk link yang sedang aktif (Kontak) */
+        nav a.active {
+            color: #8b7355;
+        }
+
+        nav a.active::after {
+            width: 80%; /* Garis bawah tetap ada di menu aktif */
+            background-color: #8b7355;
+        }
+
+        /* Tambahan: Sedikit animasi floating biar lebih 'hidup' */
+        @keyframes navFloat {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-2px); }
+            100% { transform: translateY(0); }
+        }
+
+        nav a:hover {
+            animation: navFloat 1s ease-in-out infinite;
+        }
         .header-icons {
             display: flex;
             gap: 20px;
@@ -468,12 +510,13 @@
             </div>
         </div>
         
-        <nav id="navMenu">
-            <a href="/">home</a>
-            <a href="/menu">menu</a>
-            <a href="/kontak" class="active">kontak</a>
-            <a href="/promo">promo</a>
-        </nav>
+ <nav id="navMenu">
+    <a href="/" class="{{ Request::is('/') ? 'active' : '' }}">home</a>
+    <a href="/menu" class="{{ Request::is('menu') ? 'active' : '' }}">menu</a>
+    <a href="/riwayat" class="{{ Request::is('riwayat') ? 'active' : '' }}">riwayat</a>
+    <a href="/kontak" class="{{ Request::is('kontak') ? 'active' : '' }}">kontak</a>
+    <a href="/promo" class="{{ Request::is('promo') ? 'active' : '' }}">promo</a>
+</nav>
 
         <div class="header-icons">
             <div class="icon-wrapper">

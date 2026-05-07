@@ -224,9 +224,9 @@ $clientKey = config('services.midtrans.client_key');
                 // Jika ingin hanya QRIS: uncomment baris bawah
                 // 'enabled_payments' => ['qris'],
                'callbacks' => [
-        'finish' => 'http://127.0.0.1:8000/riwayat',
-        'error'  => 'http://127.0.0.1:8000/riwayat',
-        'pending'=> 'http://127.0.0.1:8000/riwayat',
+        'finish' => url('/riwayat'),
+        'error'  => url('/riwayat'),
+        'pending'=> url('/riwayat'),
     ],
 ];
 
@@ -277,4 +277,19 @@ $clientKey = config('services.midtrans.client_key');
             ->get();
         return response()->json(['orders' => $orders]);
     }
+    
+    // Tambahkan di dalam class OrderController
+
+public function updateStatus(Request $request, $id)
+{
+    $request->validate([
+        'status' => 'required|in:shipping,completed'
+    ]);
+
+    $order = Order::findOrFail($id);
+    $order->status = $request->status;
+    $order->save();
+
+    return back()->with('success', 'Status pesanan berhasil diperbarui menjadi ' . $request->status);
+}
 }

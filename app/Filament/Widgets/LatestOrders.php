@@ -44,26 +44,27 @@ class LatestOrders extends BaseWidget
                     ->label('Total')
                     ->money('IDR'),
 
-                TextColumn::make('status')
-                    ->label('Status')
-                    ->badge()
-                    ->formatStateUsing(fn ($state) => match ($state) {
-                        'pending'     => 'Menunggu',
-                        'verified'    => 'Diverifikasi',
-                        'in_progress' => 'Diproses',
-                        'completed'   => 'Selesai',
-                        'cancelled'   => 'Dibatalkan',
-                        default       => $state,
-                    })
-                    ->color(fn ($state) => match ($state) {
-                        'pending'     => 'warning',
-                        'verified'    => 'info',
-                        'in_progress' => 'primary',
-                        'completed'   => 'success',
-                        'cancelled'   => 'danger',
-                        default       => 'gray',
-                    }),
-
+               TextColumn::make('status')
+    ->label('Status')
+    ->badge()
+    ->formatStateUsing(fn ($state) => match ($state) {
+        'pending'     => 'Menunggu',
+        'verified'    => 'Diverifikasi',
+        'in_progress' => 'Diproses',
+        'shipping'    => 'Dikirim', // <-- Tambahkan baris ini
+        'completed'   => 'Selesai',
+        'cancelled'   => 'Dibatalkan',
+        default       => $state,
+    })
+    ->color(fn ($state) => match ($state) {
+        'pending'     => 'warning',
+        'verified'    => 'info',
+        'in_progress' => 'primary',
+        'shipping'    => 'info',    // <-- Tambahkan warna (info = biru)
+        'completed'   => 'success',
+        'cancelled'   => 'danger',
+        default       => 'gray',
+    }),
                 TextColumn::make('created_at')
                     ->label('Tanggal')
                     ->dateTime('d M Y, H:i'),

@@ -49,17 +49,18 @@ class OrderResource extends Resource
     {
         return $form
             ->schema([
-                Select::make('status')
-                    ->label('Status')
-                    ->options([
-                        'pending'     => 'Menunggu Verifikasi',
-                        'paid'        => 'Paid (Midtrans)',
-                        'verified'    => 'Diverifikasi',
-                        'in_progress' => 'Sedang Diproses',
-                        'completed'   => 'Selesai',
-                        'cancelled'   => 'Dibatalkan',
-                    ])
-                    ->required(),
+              Select::make('status')
+    ->label('Status')
+    ->options([
+        'pending'     => 'Menunggu Verifikasi',
+        'paid'        => 'Paid (Midtrans)',
+        'verified'    => 'Diverifikasi',
+        'in_progress' => 'Sedang Diproses',
+        'shipping'    => 'Dikirim', // <-- Tambahkan ini
+        'completed'   => 'Selesai',
+        'cancelled'   => 'Dibatalkan',
+    ])
+    ->required(),
             ]);
     }
 
@@ -99,27 +100,29 @@ class OrderResource extends Resource
                     ->money('IDR')
                     ->sortable(),
 
-                TextColumn::make('status')
-                    ->label('Status')
-                    ->badge()
-                    ->formatStateUsing(fn ($state) => match ($state) {
-                        'pending'     => 'Menunggu',
-                        'paid'        => 'Paid',
-                        'verified'    => 'Diverifikasi',
-                        'in_progress' => 'Diproses',
-                        'completed'   => 'Selesai',
-                        'cancelled'   => 'Dibatalkan',
-                        default       => $state,
-                    })
-                    ->color(fn ($state) => match ($state) {
-                        'pending'     => 'warning',
-                        'paid'        => 'success',
-                        'verified'    => 'info',
-                        'in_progress' => 'primary',
-                        'completed'   => 'success',
-                        'cancelled'   => 'danger',
-                        default       => 'gray',
-                    }),
+               TextColumn::make('status')
+    ->label('Status')
+    ->badge()
+    ->formatStateUsing(fn ($state) => match ($state) {
+        'pending'     => 'Menunggu',
+        'paid'        => 'Paid',
+        'verified'    => 'Diverifikasi',
+        'in_progress' => 'Diproses',
+        'shipping'    => 'Dikirim', // <-- Tambahkan ini
+        'completed'   => 'Selesai',
+        'cancelled'   => 'Dibatalkan',
+        default       => $state,
+    })
+    ->color(fn ($state) => match ($state) {
+        'pending'     => 'warning',
+        'paid'        => 'success',
+        'verified'    => 'info',
+        'in_progress' => 'primary',
+        'shipping'    => 'info',    // <-- Tambahkan ini (warna biru)
+        'completed'   => 'success',
+        'cancelled'   => 'danger',
+        default       => 'gray',
+    }),
 
                 TextColumn::make('created_at')
                     ->label('Tanggal')
@@ -128,16 +131,17 @@ class OrderResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
-                SelectFilter::make('status')
-                    ->label('Status')
-                    ->options([
-                        'pending'     => 'Menunggu Verifikasi',
-                        'paid'        => 'Paid (Midtrans)',
-                        'verified'    => 'Diverifikasi',
-                        'in_progress' => 'Sedang Diproses',
-                        'completed'   => 'Selesai',
-                        'cancelled'   => 'Dibatalkan',
-                    ]),
+              SelectFilter::make('status')
+    ->label('Status')
+    ->options([
+        'pending'     => 'Menunggu Verifikasi',
+        'paid'        => 'Paid (Midtrans)',
+        'verified'    => 'Diverifikasi',
+        'in_progress' => 'Sedang Diproses',
+        'shipping'    => 'Dikirim', // <-- Tambahkan ini
+        'completed'   => 'Selesai',
+        'cancelled'   => 'Dibatalkan',
+    ]),
 
                 SelectFilter::make('payment_method')
                     ->label('Metode Bayar')
@@ -147,73 +151,38 @@ class OrderResource extends Resource
                         'bank_transfer'  => 'Transfer Bank',
                     ]),
             ])
-            ->actions([
-                Tables\Actions\Action::make('verify')
-                    ->label('Verifikasi')
-                    ->icon('heroicon-o-check-circle')
-                    ->color('success')
-                    ->requiresConfirmation()
-                    ->modalHeading('Verifikasi Pesanan')
-                    ->modalDescription('Pesanan akan diubah statusnya menjadi "Diverifikasi" dan notifikasi WhatsApp akan dikirim ke customer.')
-                    ->action(function (Order $record) {
-                        $record->load(['user', 'orderItems.product']);
-                        $record->update(['status' => 'verified']);
+          ->actions([
+    // 1. Tombol Kirim (Langsung muncul untuk pesanan yang 'in_progress')
+    Tables\Actions\Action::make('shipping')
+        ->label('Kirim')
+        ->icon('heroicon-o-truck')
+        ->color('info')
+        ->requiresConfirmation()
+        ->modalHeading('Kirim Pesanan')
+        ->modalDescription('Apakah barang sudah diserahkan ke kurir?')
+        ->action(fn (Order $record) => $record->update(['status' => 'shipping']))
+        ->visible(fn (Order $record) => $record->status === 'in_progress'),
 
-                        $waUrl = WhatsAppHelper::buildUrl($record);
+    // 2. Tombol Selesai
+    Tables\Actions\Action::make('complete')
+        ->label('Selesai')
+        ->icon('heroicon-o-check-badge')
+        ->color('success')
+        ->requiresConfirmation()
+        ->action(fn (Order $record) => $record->update(['status' => 'completed']))
+        ->visible(fn (Order $record) => $record->status === 'shipping'),
 
-                        Notification::make()
-                            ->title('Pesanan berhasil diverifikasi')
-                            ->body($waUrl
-                                ? 'Klik tombol WhatsApp untuk notifikasi customer.'
-                                : 'Customer tidak memiliki nomor telepon.')
-                            ->success()
-                            ->actions($waUrl ? [
-                                \Filament\Notifications\Actions\Action::make('whatsapp')
-                                    ->label('Kirim WhatsApp')
-                                    ->icon('heroicon-o-chat-bubble-left-ellipsis')
-                                    ->url($waUrl, shouldOpenInNewTab: true),
-                            ] : [])
-                            ->persistent()
-                            ->send();
-                    })
-                    ->visible(fn (Order $record) => $record->status === 'pending'),
+    // 3. Tombol Batalkan (Tetap ada buat jaga-jaga)
+    Tables\Actions\Action::make('cancel')
+        ->label('Batalkan')
+        ->icon('heroicon-o-x-circle')
+        ->color('danger')
+        ->requiresConfirmation()
+        ->action(fn (Order $record) => $record->update(['status' => 'cancelled']))
+        ->visible(fn (Order $record) => in_array($record->status, ['in_progress', 'shipping'])),
 
-                Tables\Actions\Action::make('process')
-                    ->label('Proses')
-                    ->icon('heroicon-o-cog-6-tooth')
-                    ->color('primary')
-                    ->requiresConfirmation()
-                    ->action(fn (Order $record) => $record->update(['status' => 'in_progress']))
-                    ->visible(fn (Order $record) => $record->status === 'verified'),
-
-                Tables\Actions\Action::make('complete')
-                    ->label('Selesai')
-                    ->icon('heroicon-o-check-badge')
-                    ->color('success')
-                    ->requiresConfirmation()
-                    ->action(fn (Order $record) => $record->update(['status' => 'completed']))
-                    ->visible(fn (Order $record) => $record->status === 'in_progress'),
-
-                Tables\Actions\Action::make('cancel')
-                    ->label('Batalkan')
-                    ->icon('heroicon-o-x-circle')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->modalHeading('Batalkan Pesanan')
-                    ->modalDescription('Pesanan akan dibatalkan. Tindakan ini tidak dapat diurungkan.')
-                    ->action(fn (Order $record) => $record->update(['status' => 'cancelled']))
-                    ->visible(fn (Order $record) => in_array($record->status, ['pending', 'verified'])),
-
-                Tables\Actions\DeleteAction::make()
-                    ->label('Hapus')
-                    ->icon('heroicon-o-trash')
-                    ->requiresConfirmation()
-                    ->modalHeading('Hapus Pesanan')
-                    ->modalDescription('Pesanan yang dibatalkan akan dihapus dari sistem. Tindakan ini tidak dapat dikembalikan.')
-                    ->visible(fn (Order $record) => $record->status === 'cancelled'),
-
-                Tables\Actions\ViewAction::make()->label('Detail'),
-            ])
+    Tables\Actions\ViewAction::make()->label('Detail'),
+])
             ->bulkActions([]);
     }
 
@@ -226,30 +195,32 @@ class OrderResource extends Resource
                     ->schema([
                         TextEntry::make('order_number')->label('No. Pesanan')->weight('bold'),
                         TextEntry::make('status')
-                            ->label('Status')
-                            ->badge()
-                            ->formatStateUsing(fn ($state) => match ($state) {
-                                'pending'           => 'Menunggu',
-                                'pending_payment'   => 'Menunggu Bayar',
-                                'confirmed'         => 'Terkonfirmasi',
-                                'paid'              => 'Paid',
-                                'verified'          => 'Diverifikasi',
-                                'in_progress'       => 'Diproses',
-                                'completed'         => 'Selesai',
-                                'cancelled'         => 'Dibatalkan',
-                                default             => $state,
-                            })
-                            ->color(fn ($state) => match ($state) {
-                                'pending'           => 'warning',
-                                'pending_payment'   => 'danger',
-                                'confirmed'         => 'success',
-                                'paid'              => 'success',
-                                'verified'          => 'info',
-                                'in_progress'       => 'primary',
-                                'completed'         => 'success',
-                                'cancelled'         => 'danger',
-                                default             => 'gray',
-                            }),
+    ->label('Status')
+    ->badge()
+    ->formatStateUsing(fn ($state) => match ($state) {
+        'pending'         => 'Menunggu',
+        'pending_payment' => 'Menunggu Bayar',
+        'confirmed'       => 'Terkonfirmasi',
+        'paid'            => 'Paid',
+        'verified'        => 'Diverifikasi',
+        'in_progress'     => 'Diproses',
+        'shipping'        => 'Dikirim', // <-- Tambahkan ini
+        'completed'       => 'Selesai',
+        'cancelled'       => 'Dibatalkan',
+        default           => $state,
+    })
+    ->color(fn ($state) => match ($state) {
+        'pending'         => 'warning',
+        'pending_payment' => 'danger',
+        'confirmed'       => 'success',
+        'paid'            => 'success',
+        'verified'        => 'info',
+        'in_progress'     => 'primary',
+        'shipping'        => 'info',    // <-- Tambahkan ini
+        'completed'       => 'success',
+        'cancelled'       => 'danger',
+        default           => 'gray',
+    }),
                         TextEntry::make('user.name')->label('Pelanggan'),
                         TextEntry::make('user.phone')->label('No. Telepon')->default('-'),
                         TextEntry::make('payment_method')->label('Metode Bayar')
