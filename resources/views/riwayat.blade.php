@@ -224,6 +224,8 @@
             .order-card { padding: 15px; }
         }
         
+      .status-shipping { background: #2196f3; color: white; }                                                                                                            
+                                                                                                                  
     </style>
 </head>
 <body>
@@ -288,17 +290,18 @@
         <div class="order-card">
             <div class="order-header">
                 <span class="order-id">#{{ $order->order_number }}</span>
-                @php
-                    $statusMap = [
-                        'pending'     => ['label' => 'Menunggu Verifikasi', 'class' => 'status-pending'],
-                        'paid'        => ['label' => 'Dibayar',             'class' => 'status-processing'],
-                        'verified'    => ['label' => 'Diverifikasi',        'class' => 'status-processing'],
-                        'in_progress' => ['label' => 'Diproses',            'class' => 'status-processing'],
-                        'completed'   => ['label' => 'Selesai',             'class' => 'status-completed'],
-                        'cancelled'   => ['label' => 'Dibatalkan',          'class' => 'status-cancelled'],
-                    ];
-                    $s = $statusMap[$order->status] ?? ['label' => ucfirst($order->status), 'class' => 'status-pending'];
-                @endphp
+         @php
+    $statusMap = [
+        'pending'     => ['label' => 'Menunggu Verifikasi', 'class' => 'status-pending'],
+        'paid'        => ['label' => 'Dibayar',             'class' => 'status-shipping'],
+        'verified'    => ['label' => 'Diverifikasi',        'class' => 'status-shipping'],
+        'in_progress' => ['label' => 'Diproses',            'class' => 'status-processing'], // UBAH KE PROCESSING (OREN)
+        'shipping'    => ['label' => 'Dikirim',             'class' => 'status-shipping'],   // TETEP SHIPPING (BIRU)
+        'completed'   => ['label' => 'Selesai',             'class' => 'status-completed'],  // UBAH KE COMPLETED (IJO)
+        'cancelled'   => ['label' => 'Dibatalkan',          'class' => 'status-cancelled'],
+    ];
+    $s = $statusMap[$order->status] ?? ['label' => ucfirst($order->status), 'class' => 'status-pending'];
+@endphp
                 <span class="order-status {{ $s['class'] }}">{{ $s['label'] }}</span>
             </div>
 
