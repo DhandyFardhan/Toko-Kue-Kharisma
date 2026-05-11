@@ -191,116 +191,190 @@ public static function getNavigationBadgeColor(): ?string
     }
 
     public static function infolist(Infolist $infolist): Infolist
-    {
-        return $infolist
+{
+    return $infolist
+        ->schema([
+           Section::make('Informasi Pesanan')
+    ->columns(2)
+    ->icon('heroicon-m-information-circle')
+    ->iconColor('primary') // Warna ikon judul section
+    ->schema([
+        TextEntry::make('order_number')
+            ->label('No. Pesanan')
+            ->weight('bold')
+            ->icon('heroicon-m-hashtag')
+            ->iconColor('primary') // Warna cokelat/emas sesuai tema kamu
+            ->copyable(),
+
+        TextEntry::make('status')
+            ->label('Status')
+            ->badge()
+            ->formatStateUsing(fn ($state) => match ($state) {
+                'pending'     => 'Menunggu',
+                'paid'        => 'Paid',
+                'verified'    => 'Diverifikasi',
+                'in_progress' => 'Diproses',
+                'shipping'    => 'Dikirim',
+                'completed'   => 'Selesai',
+                'cancelled'   => 'Dibatalkan',
+                default       => $state,
+            })
+            ->color(fn ($state) => match ($state) {
+                'pending'     => 'warning',
+                'paid'        => 'success',
+                'verified'    => 'info',
+                'in_progress' => 'primary',
+                'shipping'    => 'info',
+                'completed'   => 'success',
+                'cancelled'   => 'danger',
+                default       => 'gray',
+            }),
+
+        TextEntry::make('user.name')
+            ->label('Pelanggan')
+            ->icon('heroicon-m-user')
+            ->iconColor('info'), // Warna biru muda
+
+        TextEntry::make('user.phone')
+            ->label('No. Telepon')
+            ->default('-')
+            ->icon('heroicon-m-phone')
+            ->iconColor('success'), // Warna hijau (identik dengan telepon/WA)
+
+        TextEntry::make('payment_method')
+            ->label('Metode Bayar')
+            ->icon('heroicon-m-credit-card')
+            ->iconColor('warning') // Warna kuning/emas
+            ->formatStateUsing(fn ($state) => match ($state) {
+                'qris'           => 'QRIS',
+                'cod'            => 'COD',
+                'bank_transfer'  => 'Transfer Bank',
+                default          => strtoupper($state),
+            }),
+
+        TextEntry::make('created_at')
+            ->label('Tanggal Pesan')
+            ->icon('heroicon-m-calendar-days')
+            ->iconColor('danger') // Warna merah/pink
+            ->dateTime('d M Y, H:i'),
+
+        TextEntry::make('notes')
+            ->label('Catatan')
+            ->default('-')
+            ->icon('heroicon-m-pencil-square')
+            ->iconColor('gray')
+            ->columnSpanFull(),
+
+        TextEntry::make('delivery_address')
+            ->label('Alamat Pengiriman')
+            ->default('-')
+            ->icon('heroicon-m-map-pin')
+            ->iconColor('danger') // Warna merah (identik dengan pin map)
+            ->columnSpanFull(),
+    ]),
+
+            Section::make('Rincian Harga')
+                ->columns(2)
+                ->icon('heroicon-m-banknotes') // Ikon section harga
+                ->schema([
+                    TextEntry::make('subtotal')->label('Subtotal')->money('IDR'),
+                    TextEntry::make('shipping_cost')->label('Ongkos Kirim')->money('IDR'),
+                    TextEntry::make('discount')->label('Diskon')->money('IDR')->color('danger'),
+                    TextEntry::make('total')
+                        ->label('Total')
+                        ->money('IDR')
+                        ->weight('bold')
+                        ->size(TextEntry\TextEntrySize::Large) // Biar totalnya lebih gede
+                        ->color('primary'),
+                ]),
+      Section::make('Item Pesanan')
+    ->icon('heroicon-m-shopping-bag')
+    ->iconColor('primary')
+    ->schema([
+       RepeatableEntry::make('orderItems')
+            ->label('')
             ->schema([
-                Section::make('Informasi Pesanan')
-                    ->columns(2)
-                    ->schema([
-                        TextEntry::make('order_number')->label('No. Pesanan')->weight('bold'),
-                        TextEntry::make('status')
-    ->label('Status')
-    ->badge()
-    ->formatStateUsing(fn ($state) => match ($state) {
-        'pending'         => 'Menunggu',
-        'pending_payment' => 'Menunggu Bayar',
-        'confirmed'       => 'Terkonfirmasi',
-        'paid'            => 'Paid',
-        'verified'        => 'Diverifikasi',
-        'in_progress'     => 'Diproses',
-        'shipping'        => 'Dikirim', // <-- Tambahkan ini
-        'completed'       => 'Selesai',
-        'cancelled'       => 'Dibatalkan',
-        default           => $state,
-    })
-    ->color(fn ($state) => match ($state) {
-        'pending'         => 'warning',
-        'pending_payment' => 'danger',
-        'confirmed'       => 'success',
-        'paid'            => 'success',
-        'verified'        => 'info',
-        'in_progress'     => 'primary',
-        'shipping'        => 'info',    // <-- Tambahkan ini
-        'completed'       => 'success',
-        'cancelled'       => 'danger',
-        default           => 'gray',
-    }),
-                        TextEntry::make('user.name')->label('Pelanggan'),
-                        TextEntry::make('user.phone')->label('No. Telepon')->default('-'),
-                        TextEntry::make('payment_method')->label('Metode Bayar')
-                            ->formatStateUsing(fn ($state) => match ($state) {
-                                'qris'           => 'QRIS',
-                                'cod'            => 'COD',
-                                'bank_transfer'  => 'Transfer Bank',
-                                default          => strtoupper($state),
-                            }),
-                        TextEntry::make('created_at')->label('Tanggal Pesan')->dateTime('d M Y, H:i'),
-                        TextEntry::make('notes')->label('Catatan')->default('-')->columnSpanFull(),
-                        TextEntry::make('delivery_address')->label('Alamat Pengiriman')->default('-')->columnSpanFull(),
-                    ]),
+               TextEntry::make('product.name')
+                    ->label('Produk')
+                    ->weight('medium')
+                    ->icon('heroicon-m-cake')
+                    ->iconColor('warning'),
 
-                Section::make('Rincian Harga')
-                    ->columns(2)
-                    ->schema([
-                        TextEntry::make('subtotal')->label('Subtotal')->money('IDR'),
-                        TextEntry::make('shipping_cost')->label('Ongkos Kirim')->money('IDR'),
-                        TextEntry::make('discount')->label('Diskon')->money('IDR'),
-                        TextEntry::make('total')->label('Total')->money('IDR')->weight('bold'),
-                    ]),
+               TextEntry::make('quantity')
+                    ->label('Jumlah')
+                    ->icon('heroicon-m-squares-2x2')
+                    ->iconColor('info'),
 
-                Section::make('Item Pesanan')
-                    ->schema([
-                        RepeatableEntry::make('orderItems')
-                            ->label('')
-                            ->schema([
-                                TextEntry::make('product.name')->label('Produk'),
-                                TextEntry::make('quantity')->label('Qty'),
-                                TextEntry::make('price')->label('Harga Satuan')->money('IDR'),
-                                TextEntry::make('subtotal')->label('Subtotal')->money('IDR'),
-                            ])
-                            ->columns(4),
-                    ]),
+                TextEntry::make('price') // <--- Harga Satuan tetap ada
+                    ->label('Harga Satuan')
+                    ->money('IDR')
+                    ->icon('heroicon-m-tag')
+                    ->iconColor('success'),
+                    
+                TextEntry::make('subtotal') // <--- Subtotal per item tetap ada
+                    ->label('Subtotal')
+                    ->money('IDR')
+                    ->weight('bold')
+                    ->icon('heroicon-m-arrow-right-circle')
+                    ->iconColor('success'),
+            ])
+            ->columns(4),
+    ]),
 
-                Section::make('Bukti Pembayaran (Transfer Bank)')
-                    ->visible(fn (Order $record) => $record->payment_method === 'bank_transfer')
-                    ->schema([
-                        TextEntry::make('paymentProof.bank_name')
-                            ->label('Bank Pengirim')
-                            ->default('-'),
-                        TextEntry::make('paymentProof.account_name')
-                            ->label('Atas Nama')
-                            ->default('-'),
-                        TextEntry::make('paymentProof.amount')
-                            ->label('Jumlah Transfer')
-                            ->money('IDR')
-                            ->default('-'),
-                        TextEntry::make('paymentProof.status')
-                            ->label('Status Bukti')
-                            ->badge()
-                            ->formatStateUsing(fn ($state) => match ($state) {
-                                'pending'   => 'Menunggu Verifikasi',
-                                'verified'  => 'Diverifikasi',
-                                'rejected'  => 'Ditolak',
-                                default     => '-',
-                            })
-                            ->color(fn ($state) => match ($state) {
-                                'pending'   => 'warning',
-                                'verified'  => 'success',
-                                'rejected'  => 'danger',
-                                default     => 'gray',
-                            })
-                            ->default('-'),
-                        \Filament\Infolists\Components\ImageEntry::make('paymentProof.proof_image')
-                            ->label('Bukti Transfer')
-                            ->disk('public')
-                            ->default('-'),
-                        TextEntry::make('paymentProof.admin_notes')
-                            ->label('Catatan Admin')
-                            ->default('-')
-                            ->markdown(),
-                    ])->columns(2),
-            ]);
-    }
+Section::make('Bukti Pembayaran (Transfer Bank)')
+    ->icon('heroicon-m-document-check') // Tambah ikon dokumen
+    ->visible(fn (Order $record) => $record->payment_method === 'bank_transfer')
+    ->schema([
+        TextEntry::make('paymentProof.bank_name')
+            ->label('Bank Pengirim')
+            ->icon('heroicon-m-building-library')
+            ->default('-'),
+
+        TextEntry::make('paymentProof.account_name')
+            ->label('Atas Nama')
+            ->icon('heroicon-m-user-circle')
+            ->default('-'),
+
+        TextEntry::make('paymentProof.amount')
+            ->label('Jumlah Transfer')
+            ->icon('heroicon-m-currency-dollar')
+            ->money('IDR')
+            ->default('-'),
+
+        TextEntry::make('paymentProof.status')
+            ->label('Status Bukti')
+            ->badge()
+            ->formatStateUsing(fn ($state) => match ($state) {
+                'pending'   => 'Menunggu Verifikasi',
+                'verified'  => 'Diverifikasi',
+                'rejected'  => 'Ditolak',
+                default     => '-',
+            })
+            ->color(fn ($state) => match ($state) {
+                'pending'   => 'warning',
+                'verified'  => 'success',
+                'rejected'  => 'danger',
+                default     => 'gray',
+            })
+            ->default('-'),
+
+        \Filament\Infolists\Components\ImageEntry::make('paymentProof.proof_image')
+            ->label('Bukti Transfer')
+            ->disk('public')
+            ->columnSpanFull() // Biar gambar bukti transfernya gede
+            ->default('-'),
+
+        TextEntry::make('paymentProof.admin_notes')
+            ->label('Catatan Admin')
+            ->icon('heroicon-m-chat-bubble-left-right')
+            ->default('-')
+            ->markdown()
+            ->columnSpanFull(),
+    ])->columns(2),
+
+            // ... sisa kode Item Pesanan dan Bukti Pembayaran tetap sama
+        ]);
+}
 
     public static function getRelations(): array
     {

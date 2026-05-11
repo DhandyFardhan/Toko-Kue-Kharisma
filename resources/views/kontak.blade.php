@@ -490,6 +490,40 @@
             .contact-form { padding: 20px 15px; }
             .contact-title { font-size: 24px; }
         }
+
+        /* 1. Definisikan Keyframe Animasi */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 2. Terapkan pada Container Utama */
+.contact-container {
+    /* ... kode lama kamu ... */
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+/* 3. Efek Staggered (Muncul bergantian) agar lebih estetik */
+.contact-form {
+    animation: fadeInUp 1s ease-out 0.2s forwards;
+    opacity: 0; /* Mulai dari transparan */
+}
+
+.contact-info {
+    animation: fadeInUp 1s ease-out 0.4s forwards;
+    opacity: 0; /* Mulai dari transparan */
+}
+
+/* Animasi untuk info card satu per satu */
+.info-card:nth-child(1) { animation-delay: 0.5s; }
+.info-card:nth-child(2) { animation-delay: 0.6s; }
+.info-card:nth-child(3) { animation-delay: 0.7s; }
     </style>
 </head>
 <body>

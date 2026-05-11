@@ -405,26 +405,26 @@
             transform: translateY(-2px);
         }
 
-        /* Hero Section */
-        .hero {
-            position: relative;
-            height: 250px;
-            overflow: hidden;
-            cursor: pointer;
-        }
+            /* Hero Section */
+            .hero {
+                position: relative;
+                height: 250px;
+                overflow: hidden;
+                cursor: pointer;
+            }
 
-        .hero-images {
-            display: flex;
-            height: 100%;
-            transition: transform 0.8s ease-in-out;
-        }
+            .hero-images {
+                display: flex;
+                height: 100%;
+                transition: transform 0.8s ease-in-out;
+            }
 
-        .hero-image {
-            min-width: 100%;
-            height: 100%;
-            background-size: cover;
-            background-position: center;
-        }
+            .hero-image {
+                min-width: 100%;
+                height: 100%;
+                background-size: cover;
+                background-position: center;
+            }
 
         /* Slider Navigation Areas */
         .slider-nav {
@@ -1148,6 +1148,85 @@
     0%, 100% { transform: rotate(0); }
     25% { transform: rotate(-3deg); }
     75% { transform: rotate(3deg); }
+}
+
+/* Judul Best Sellers yang lebih bergaya */
+.section-title {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+    font-size: 36px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: linear-gradient(to right, #8b7355, #d4b896, #8b7355);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 5px;
+}
+
+/* Tambahkan icon mahkota kecil di atas judul */
+.section-title::before {
+    content: '👑'; /* Ikon Mahkota */
+    display: block;
+    font-size: 24px;
+    margin-bottom: 5px;
+    -webkit-text-fill-color: initial; /* Biar warna aslinya muncul */
+}
+
+/* Divider yang lebih estetik */
+.section-divider {
+    width: 80px;
+    height: 4px;
+    background: #8b7355;
+    border-radius: 10px;
+    margin: 0 auto 50px;
+    position: relative;
+}
+
+.section-divider::after {
+    content: '';
+    position: absolute;
+    width: 150px;
+    height: 1px;
+    background: #d4b896;
+    bottom: 2px;
+    left: -35px;
+    z-index: -1;
+}
+
+/* Efek khusus untuk kartu Best Seller */
+.product-card {
+    position: relative;
+    border: 1px solid rgba(139, 115, 85, 0.1);
+    overflow: visible; /* Biar badge bisa keluar dikit dari box */
+}
+
+/* Badge "Top #1" atau "Best" di pojok kartu */
+.product-card::after {
+    content: 'TOP SELL';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: #e67e22;
+    color: white;
+    padding: 5px 12px;
+    font-size: 11px;
+    font-weight: bold;
+    border-radius: 50px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transform: rotate(5deg);
+    z-index: 10;
+}
+
+/* Overlay gradient halus pada gambar */
+.product-image-container::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(to bottom, transparent 70%, rgba(139, 115, 85, 0.05));
+    pointer-events: none;
 }
     </style>
 </head>

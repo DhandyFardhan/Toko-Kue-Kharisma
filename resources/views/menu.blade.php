@@ -792,7 +792,9 @@ nav {
     align-items: center;
     border-top: 1px solid rgba(139, 115, 85, 0.1);
     padding-top: 20px;
-}                                            
+}    
+
+
     </style>
 </head>
 <body>

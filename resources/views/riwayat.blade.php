@@ -114,13 +114,50 @@
             margin: 50px auto;
             padding: 0 50px;
         }
+/* Styling Judul Halaman yang baru */
+/* Styling Judul Halaman yang baru */
+/* Styling Judul Halaman yang lebih estetik */
+.page-title {
+    font-size: clamp(26px, 6vw, 36px);
+    font-weight: 800;
+    color: #68625c; /* Warna cokelat gelap yang lebih elegan */
+    margin: 40px auto;
+    text-align: center;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
 
-        .page-title {
-            font-size: 28px;
-            font-weight: 600;
-            color: #2c2c2c;
-            margin-bottom: 30px;
-        }
+/* Ornamen garis dekoratif di kiri dan kanan */
+.page-title::before,
+.page-title::after {
+    content: '';
+    height: 2px;
+    width: 60px;
+    background: linear-gradient(to var(--direction, right), transparent, #8b7355);
+}
+
+.page-title::before {
+    --direction: left;
+}
+
+.page-title::after {
+    --direction: right;
+}
+
+/* Styling icon jam di dalam judul */
+.page-title svg {
+    width: 38px;
+    height: 38px;
+    stroke: #8b7355;
+    fill: rgba(139, 115, 85, 0.1);
+    stroke-width: 1.5;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
 
         /* Order Card — sama dengan profile */
         .order-card {
@@ -224,8 +261,67 @@
             .order-card { padding: 15px; }
         }
         
-      .status-shipping { background: #2196f3; color: white; }                                                                                                            
-                                                                                                                  
+      .status-shipping { background: #2196f3; color: white; }  
+      
+      /* Animasi Fade In Up */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Class untuk memicu animasi */
+.animate-in {
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 0; /* Mulai dari transparan */
+}
+
+/* Efek stagger (berurutan) untuk kartu pesanan */
+.order-card:nth-child(1) { animation-delay: 0.1s; }
+.order-card:nth-child(2) { animation-delay: 0.2s; }
+.order-card:nth-child(3) { animation-delay: 0.3s; }
+.order-card:nth-child(n+4) { animation-delay: 0.4s; }
+                       
+/* Animasi dasar untuk seluruh halaman */
+body {
+    opacity: 0;
+    animation: pageShow 0.8s ease-out forwards;
+}
+
+@keyframes pageShow {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Animasi khusus untuk container riwayat agar muncul dari bawah */
+.riwayat-container {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: slideUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: 0.2s; /* Muncul sedikit setelah background */
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Efek Stagger untuk Order Card (Sudah ada di kodemu, pastikan classnya terpasang) */
+.order-card {
+    opacity: 0;
+    animation: fadeInUp 0.5s ease-out forwards;
+}
     </style>
 </head>
 <body>
@@ -284,7 +380,10 @@
 
     <!-- Main Content -->
     <div class="riwayat-container">
-        <h1 class="page-title">Riwayat Pemesanan</h1>
+        <h1 class="page-title">
+    <svg viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+    Riwayat Pemesanan
+</h1>
         <div id="orderHistoryContainer">
         @forelse($orders as $order)
         <div class="order-card">

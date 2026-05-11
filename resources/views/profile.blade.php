@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Profil - Toko Kue Kharisma</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <style>
         :root {
             --bg-original: #f5deb3;
@@ -156,6 +158,38 @@
             .profile-container { grid-template-columns: 1fr; }
             .form-row { grid-template-columns: 1fr; }
         }
+
+        /* Styling Input Group agar Icon & Input Menyatu */
+.input-group {
+    display: flex;
+    align-items: stretch;
+    background: #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid #f0f0f0;
+    transition: 0.3s;
+}
+
+.input-group:focus-within {
+    border-color: var(--primary-brown);
+    background: #fffcf8;
+}
+
+.input-group-text {
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    background: transparent;
+    color: var(--primary-brown);
+    font-size: 18px;
+}
+
+.input-group .form-control {
+    border: none !important; /* Hilangkan border asli input */
+    background: transparent !important;
+}
+
+
     </style>
 </head>
 <body>
@@ -207,120 +241,224 @@
                     <input type="file" id="avatarInput" name="photo" style="display:none" accept="image/*">
 
                     <div class="form-group">
-                        <label>Nama Lengkap</label>
-                        <input type="text" name="name" class="form-control" value="{{ $user->name ?? 'Dandi Adrian' }}">
-                    </div>
+    <label>Nama Lengkap</label>
+    <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+        <input type="text" name="name" class="form-control" value="{{ $user->name ?? 'Dandi Adrian' }}">
+    </div>
+</div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" name="email" class="form-control" value="{{ $user->email ?? 'dandi1@gmail.com' }}">
-                        </div>
-                        <div class="form-group">
-                            <label>Nomor WhatsApp</label>
-                            <input type="text" name="phone" class="form-control" placeholder="0812xxxx" value="{{ $user->phone ?? '' }}">
-                        </div>
-                    </div>
+<div class="form-row">
+    <div class="form-group">
+        <label>Email</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-envelope-at-fill"></i></span>
+            <input type="email" name="email" class="form-control" value="{{ $user->email ?? 'dandi1@gmail.com' }}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Nomor WhatsApp</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-whatsapp"></i></span>
+            <input type="text" name="phone" class="form-control" placeholder="0812xxxx" value="{{ $user->phone ?? '' }}">
+        </div>
+    </div>
+</div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Tanggal Lahir</label>
-                            <input type="date" name="birthdate" class="form-control" value="{{ $user->birthdate ?? '' }}">
-                        </div>
-                        <div class="form-group">
-                            <label>Jenis Kelamin</label>
-                            <select name="gender" class="form-control">
-                                <option value="Laki-laki" {{ ($user->gender ?? '') == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
-                                <option value="Perempuan" {{ ($user->gender ?? '') == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
-                            </select>
-                        </div>
-                    </div>
+<div class="form-row">
+    <div class="form-group">
+        <label>Tanggal Lahir</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+            <input type="date" name="birthdate" class="form-control" value="{{ $user->birthdate ?? '' }}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label>Jenis Kelamin</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-gender-ambiguous"></i></span>
+            <select name="gender" class="form-control">
+                <option value="Laki-laki" {{ ($user->gender ?? '') == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
+                <option value="Perempuan" {{ ($user->gender ?? '') == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
+            </select>
+        </div>
+    </div>
+</div>
 
-                    <button type="submit" class="btn-save">Simpan Perubahan Profil</button>
+<button type="submit" class="btn-save">
+    <i class="bi bi-check-circle-fill me-2"></i> Simpan Perubahan Profil
+</button>
                 </form>
+                
             </section>
+<section id="settings" class="content-section">
+    <h2 class="section-title">Keamanan & Password</h2>
+    <form action="{{ route('profile.password') }}" method="POST">
+        @csrf 
+        @method('PUT')
+        
+        <div class="form-group">
+            <label>Password Saat Ini</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-shield-lock-fill"></i></span>
+                <input type="password" name="old_password" class="form-control" placeholder="Masukkan password lama kamu">
+            </div>
+        </div>
 
-            <section id="address" class="content-section">
-                <h2 class="section-title">Alamat Pengiriman</h2>
-                <form action="{{ route('profile.update') }}" method="POST">
-                    @csrf @method('PUT')
-                    
-                    <div class="form-group">
-                        <label>Alamat Lengkap</label>
-                        <textarea id="address_text" name="address" class="form-control" rows="3" placeholder="Masukkan alamat lengkap atau cari di peta...">{{ $user->address ?? '' }}</textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Titik Koordinat (Geser pin pada peta)</label>
-                        <div id="map"></div>
-                        <input type="hidden" name="latitude" id="lat" value="{{ $user->latitude ?? '' }}">
-                        <input type="hidden" name="longitude" id="lng" value="{{ $user->longitude ?? '' }}">
-                    </div>
-
-                    <button type="submit" class="btn-save">Simpan Alamat Saja</button>
-                </form>
-            </section>
-
-            <section id="settings" class="content-section">
-                <h2 class="section-title">Keamanan & Password</h2>
-                <form action="{{ route('profile.password') }}" method="POST">
-                    @csrf @method('PUT')
-                    
-                    <div class="form-group">
-                        <label>Password Lama</label>
-                        <input type="password" name="old_password" class="form-control" placeholder="Masukkan password saat ini">
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Password Baru</label>
-                            <input type="password" name="password" class="form-control" placeholder="Minimal 8 karakter">
-                        </div>
-                        <div class="form-group">
-                            <label>Konfirmasi Password Baru</label>
-                            <input type="password" name="password_confirmation" class="form-control" placeholder="Ulangi password baru">
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn-save">Update Password</button>
-                </form>
-            </section>
-
-            <section id="orders" class="content-section">
-                <h2 class="section-title">Riwayat Pesanan</h2>
-                @forelse($orders as $order)
-                <div style="background: #f9f9f9; border-radius: 12px; padding: 20px; margin-bottom: 15px; border-left: 5px solid #8b7355;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <span style="font-weight: 600; color: #2c2c2c;">{{ $order->order_number }}</span>
-                        <span style="font-size: 13px; background: 
-                            @if($order->status === 'pending') #ffc107
-                            @elseif($order->status === 'paid') #28a745
-                            @elseif($order->status === 'shipped') #17a2b8
-                            @else #6c757d
-                            @endif; 
-                            color: white; padding: 5px 12px; border-radius: 20px;">{{ ucfirst($order->status) }}</span>
-                    </div>
-                    <div style="font-size: 13px; color: #666; margin-bottom: 12px;">
-                        <p style="margin: 5px 0;"><strong>Tanggal:</strong> {{ $order->created_at->format('d M Y H:i') }}</p>
-                        <p style="margin: 5px 0;"><strong>Total:</strong> Rp {{ number_format($order->total, 0, ',', '.') }}</p>
-                        <p style="margin: 5px 0;"><strong>Metode Pembayaran:</strong> {{ ucfirst($order->payment_method) }}</p>
-                        <p style="margin: 5px 0;"><strong>Alamat:</strong> {{ $order->delivery_address }}</p>
-                    </div>
-                    <div style="padding-top: 10px; border-top: 1px solid #eee;">
-                        <strong style="font-size: 13px; color: #2c2c2c;">Item Pesanan:</strong>
-                        <ul style="margin: 8px 0 0 20px; font-size: 13px; color: #666;">
-                            @foreach($order->orderItems as $item)
-                            <li>{{ $item->product->name ?? 'Produk Terhapus' }} x{{ $item->quantity }} - Rp {{ number_format($item->subtotal, 0, ',', '.') }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Password Baru</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+                    <input type="password" name="password" class="form-control" placeholder="Minimal 8 karakter">
                 </div>
-                @empty
-                <div style="text-align:center; padding:50px 0; border: 2px dashed #ddd; border-radius: 15px;">
-                    <p style="color: #999; font-weight: 600;">Belum ada pesanan yang ditemukan.</p>
+            </div>
+            
+            <div class="form-group">
+                <label>Konfirmasi Password Baru</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-patch-check-fill"></i></span>
+                    <input type="password" name="password_confirmation" class="form-control" placeholder="Ulangi password baru">
                 </div>
-                @endforelse
-            </section>
+            </div>
+        </div>
+
+        <div style="background: #fff3cd; color: #856404; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; display: flex; align-items: center; gap: 10px;">
+            <i class="bi bi-exclamation-triangle-fill" style="font-size: 20px;"></i>
+            <span>Gunakan password yang kuat agar akunmu tetap aman. Jangan berikan password kepada siapapun.</span>
+        </div>
+
+        <button type="submit" class="btn-save">
+            <i class="bi bi-shield-check me-2"></i> Perbarui Keamanan
+        </button>
+    </form>
+</section>
+<section id="address" class="content-section">
+    <h2 class="section-title">Alamat Pengiriman</h2>
+    <form action="{{ route('profile.update') }}" method="POST">
+        @csrf 
+        @method('PUT')
+        
+    <div class="form-group">
+    <label>Alamat Lengkap</label>
+    <div class="input-group" style="align-items: flex-start;">
+        <span class="input-group-text" style="padding-top: 12px;"><i class="bi bi-geo-alt-fill"></i></span>
+        <textarea id="address_text" name="address" class="form-control" rows="3" 
+            placeholder="Masukkan alamat lengkap...">{{ $user->address ?? '' }}</textarea>
+    </div>
+
+@if($user->address)
+<div style="margin-top: 12px; display: flex; align-items: center; background: #fff9f0; padding: 10px; border-radius: 8px; border: 1px dashed #de5246;">
+    <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode($user->address) }}" 
+       target="_blank" 
+       title="Lihat di Google Maps"
+       style="color: #de5246; font-size: 24px; text-decoration: none; display: flex; align-items: center;">
+        <i class="bi bi-geo-alt-fill"></i>
+    </a>
+    
+    <i class="bi bi-arrow-left-short" style="font-size: 20px; color: #de5246; margin-left: 5px;"></i>
+
+    <span style="font-size: 12px; color: #666; font-weight: 500;">
+        Klik icon merah untuk melihat lokasi di Google Maps
+    </span>
+</div>
+@endif
+<div style="margin-top: 25px; padding: 15px; background-color: #fdf2e2; border-radius: 12px; border: 1px solid #e9d7c3;">
+    <h6 style="color: #855c33; font-weight: bold; font-size: 14px; margin-bottom: 10px;">
+        <i class="bi bi-truck me-2"></i> Info Pengiriman Kharisma
+    </h6>
+    <ul style="font-size: 12px; color: #5d4037; list-style: none; padding-left: 0; margin-bottom: 0;">
+        <li class="mb-2"><i class="bi bi-check2-circle me-2 text-success"></i> <strong>Area Bogor:</strong> Estimasi 20-40 menit sampai.</li>
+        <li class="mb-2"><i class="bi bi-check2-circle me-2 text-success"></i> <strong>Luar Bogor:</strong> Menggunakan ekspedisi reguler (6-12 Jam).</li>
+        <li><i class="bi bi-info-circle me-2 text-primary"></i> Pastikan titik Maps sudah sesuai dengan alamat rumah Anda.</li>
+    </ul>
+</div>
+
+</div>
+
+
+        <button type="submit" class="btn-save">
+            <i class="bi bi-geo-fill me-2"></i> Simpan Alamat & Lokasi
+        </button>
+    </form>
+</section>
+ <section id="orders" class="content-section">
+    <h2 class="section-title" style="margin-bottom: 25px; color: #5d4037; font-weight: 800;">Riwayat Pesanan</h2>
+    
+    @forelse($orders as $order)
+    <div style="background: #f4f4f4; border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: transform 0.2s ease; border: 1px solid #e0e0e0;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e0e0; padding-bottom: 15px; margin-bottom: 15px;">
+            <div>
+                <span style="font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; display: block;">ID Pesanan</span>
+                <span style="font-weight: 700; color: #2c2c2c; font-size: 16px;">#{{ $order->order_number }}</span>
+            </div>
+        <span style="font-size: 12px; font-weight: 700; padding: 8px 16px; border-radius: 12px; display: flex; align-items: center; gap: 8px;
+                @if($order->status === 'pending') background: #ff9500; color: #ff9100;
+                @elseif($order->status === 'in_progress') background: #ffa24c; color: #000000;
+                @elseif($order->status === 'shipped') background: #0095ff; color: #000000;
+                @elseif($order->status === 'completed') background: #b6ff7a; color: #000000fd;
+                @else background: #f90025; color: #000000;
+                @endif">
+                
+                @if($order->status === 'pending') <i class="bi bi-hourglass-split"></i> Menunggu
+                @elseif($order->status === 'in_progress') <i class="bi bi-check-all"></i> Proses
+                @elseif($order->status === 'shipped') <i class="bi bi-truck"></i> Dikirim
+                @elseif($order->status === 'completed') <i class="bi bi-stars"></i> Selesai
+                @else <i class="bi bi-x-circle-fill"></i> Dibatalkan
+                @endif
+            </span>
+        </div>
+
+       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="background: #ffe4e1; padding: 10px; border-radius: 12px; color: #ff6b6b;"><i class="bi bi-calendar-check-fill"></i></div>
+                <div>
+                    <p style="margin: 0; font-size: 10px; color: #999; text-transform: uppercase;">Tanggal</p>
+                    <p style="margin: 0; font-size: 13px; color: #333; font-weight: 700;">{{ $order->created_at->format('d M Y') }}</p>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="background: #e0f2fe; padding: 10px; border-radius: 12px; color: #0284c7;"><i class="bi bi-credit-card-2-back-fill"></i></div>
+                <div>
+                    <p style="margin: 0; font-size: 10px; color: #999; text-transform: uppercase;">Metode</p>
+                    <p style="margin: 0; font-size: 13px; color: #333; font-weight: 700;">{{ strtoupper($order->payment_method) }}</p>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="background: #f0fdf4; padding: 10px; border-radius: 12px; color: #16a34a;"><i class="bi bi-cash-stack"></i></div>
+                <div>
+                    <p style="margin: 0; font-size: 10px; color: #999; text-transform: uppercase;">Total</p>
+                    <p style="margin: 0; font-size: 15px; color: #8b7355; font-weight: 800;">Rp {{ number_format($order->total, 0, ',', '.') }}</p>
+                </div>
+            </div>
+        </div>
+       <div style="background: #fff; border: 1px solid #eee; padding: 15px; border-radius: 12px; margin-bottom: 20px; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #bc9c78;"></div>
+            <p style="margin: 0 0 5px 0; font-size: 11px; font-weight: 800; color: #bc9c78;"><i class="bi bi-geo-alt-fill me-1"></i> TUJUAN PENGIRIMAN</p>
+            <p style="margin: 0; font-size: 13px; color: #555; line-height: 1.5;">{{ $order->delivery_address }}</p>
+        </div>
+
+       <div style="padding-top: 15px; border-top: 1px dashed #ccc;">
+            <p style="margin: 0 0 10px 0; font-size: 12px; font-weight: 700; color: #444;"><i class="bi bi-bag-check-fill me-2" style="color: #bc9c78;"></i>Daftar Belanja:</p>
+            <ul style="margin: 0; padding: 0; list-style: none;">
+                @foreach($order->orderItems as $item)
+                <li style="display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-bottom: 8px;">
+                    <span><i class="bi bi-egg-fill me-2" style="color: #ffd54f;"></i>{{ $item->product->name }} <strong style="color: #bc9c78;">x{{ $item->quantity }}</strong></span>
+                    <span style="font-weight: 700; color: #333;">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</span>
+                </li>
+                @endforeach
+            </ul>
+        </div>
+    </div>
+    @empty
+    <div style="text-align:center; padding:60px; background: #f8f9fa; border-radius: 20px; border: 2px dashed #dee2e6;">
+        <i class="bi bi-cart-x" style="font-size: 50px; color: #ced4da;"></i>
+        <p style="margin-top: 15px; color: #adb5bd; font-weight: 600;">Belum ada pesanan nih, abangkuh!</p>
+    </div>
+    @endforelse
+</section>
+</section>
         </main>
     </div>
 

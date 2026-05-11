@@ -846,6 +846,91 @@
                 .item-name { font-size: 15px; }
                 .checkout-modal-content { padding: 20px 15px; }
             }
+
+            /* Tambahkan di dalam <style> */
+.cart-item {
+    /* ... kode yang sudah ada ... */
+    animation: fadeInItem 0.5s ease backwards;
+}
+
+@keyframes fadeInItem {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Membuat item muncul bergantian (staggered effect) */
+.cart-item:nth-child(1) { animation-delay: 0.1s; }
+.cart-item:nth-child(2) { animation-delay: 0.2s; }
+.cart-item:nth-child(3) { animation-delay: 0.3s; }
+
+/* Styling Baru untuk Alamat Pengiriman */
+.address-card {
+    background: #ffffff;
+    border: 2px solid #f0f0f0;
+    border-radius: 15px;
+    padding: 20px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.address-card:hover {
+    border-color: #d4b896;
+    box-shadow: 0 5px 15px rgba(212, 184, 150, 0.1);
+}
+
+.address-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    color: #8b7355;
+}
+
+.address-header svg {
+    width: 20px;
+    height: 20px;
+    fill: #8b7355;
+}
+
+.address-header span {
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.address-content {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #4a4a4a;
+}
+
+.address-footer {
+    margin-top: 15px;
+    padding-top: 12px;
+    border-top: 1px dashed #e0e0e0;
+}
+
+.btn-change-address {
+    color: #8b7355;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-change-address:hover {
+    color: #2c2c2c;
+    text-decoration: underline;
+}
         </style>
     </head>
     <body>
@@ -1024,17 +1109,27 @@
 
             <div class="checkout-section">
                 
-                <div class="form-group">
-                    <label>Alamat Pengiriman</label>
-                    <div style="padding: 10px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee; font-size: 0.9rem; color: #555;">
-                        <strong>Dikirim ke:</strong><br>
-                        {{ auth()->user()->address ?? 'Alamat belum diatur di profil' }}
-                        <input type="hidden" name="address" value="{{ auth()->user()->address }}">
-                    </div>
-                    <small style="color: #888; font-size: 0.75rem; margin-top: 5px; display: block;">
-                        Ingin ganti alamat? Ubah di menu <a href="/profile" style="color: #8b7355; text-decoration: underline;">Profil</a>
-                    </small>
-                </div>
+               <div class="form-group">
+    <label>Alamat Pengiriman</label>
+    <div class="address-card">
+        
+        <div class="address-content">
+           
+            {{ auth()->user()->address ?? 'Alamat belum diatur di profil' }}
+            <input type="hidden" name="address" value="{{ auth()->user()->address }}">
+        </div>
+
+        <div class="address-footer">
+            <a href="/profile" class="btn-change-address">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                Ubah Alamat
+            </a>
+        </div>
+    </div>
+</div>
                 
                 <div class="form-group">
                     <label>Catatan Pesanan (Opsional)</label>
