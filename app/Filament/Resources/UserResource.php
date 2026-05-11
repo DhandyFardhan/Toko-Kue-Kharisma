@@ -119,12 +119,18 @@ class UserResource extends Resource
             ->bulkActions([]);
     }
 
-    public static function getPages(): array
+   public static function getPages(): array
     {
         return [
             'index'  => Pages\ListUsers::route('/'),
             'create' => Pages\CreateUser::route('/create'),
             'edit'   => Pages\EditUser::route('/{record}/edit'),
         ];
+    }
+
+    // TAMBAHKAN INI
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()->where('role', 'user');
     }
 }

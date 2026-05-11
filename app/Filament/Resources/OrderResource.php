@@ -35,15 +35,19 @@ class OrderResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    public static function getNavigationBadge(): ?string
-    {
-        return static::getModel()::where('status', 'pending')->count() ?: null;
-    }
+   // Di dalam class OrderResource
 
-    public static function getNavigationBadgeColor(): ?string
-    {
-        return 'warning';
-    }
+
+public static function getNavigationBadge(): ?string
+{
+    // Hitung hanya yang is_read-nya false (0)
+    return static::getModel()::where('is_read', false)->count() ?: null;
+}
+
+public static function getNavigationBadgeColor(): ?string
+{
+    return 'danger'; // Pakai warna merah biar kontras
+}
 
     public static function form(Form $form): Form
     {

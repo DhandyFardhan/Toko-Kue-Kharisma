@@ -10,13 +10,33 @@ use Filament\Actions;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 
+// ... (namespace dan use tetap sama)
+
 class ViewOrder extends ViewRecord
 {
     protected static string $resource = OrderResource::class;
 
+    /**
+     * Fungsi ini berjalan saat halaman Detail dibuka
+     */
+    public function mount($record): void
+    {
+        parent::mount($record);
+
+        // Jika pesanan ini belum dibaca, tandai sebagai sudah dibaca
+        if (!$this->record->is_read) {
+            $this->record->update([
+                'is_read' => true
+            ]);
+        }
+    }
+
     protected function getHeaderActions(): array
     {
+        // ... (isi header actions kamu tetap sama, tidak ada yang diubah)
         $actions = [];
+        
+        // ... dst
 
         // Action untuk verifikasi payment jika ada bukti transfer yang pending
         if ($this->record->payment_method === 'bank_transfer' && $this->record->paymentProof) {
@@ -151,4 +171,6 @@ class ViewOrder extends ViewRecord
 
         return $actions;
     }
+
+    
 }
