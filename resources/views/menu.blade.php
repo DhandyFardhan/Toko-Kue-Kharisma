@@ -712,6 +712,87 @@ nav {
     transform: skewX(-5deg); /* Sedikit miring gaya kaligrafi saat di-hover */
     text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
 }
+                                            
+                                            /* Modal Detail Produk */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7);
+    backdrop-filter: blur(5px);
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: #F3DEBA;
+    padding: 30px;
+    border-radius: 20px;
+    width: 95%; 
+    max-width: 750px; /* INI KUNCINYA: Diperlebar dari 600px ke 850px */
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    animation: zoomIn 0.3s ease;
+}
+
+    @keyframes zoomIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.close-modal {
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    font-size: 30px;
+    cursor: pointer;
+    color: #8b7355;
+}
+
+.modal-body {
+    display: flex;
+    gap: 20px;
+}
+
+@media (max-width: 600px) {
+    .modal-body { flex-direction: column; }
+}
+
+/* Cari dan ganti .modal-img kamu dengan ini */
+.modal-img {
+    width: 300px; /* Ukuran gambar diperbesar sedikit */
+    height: 300px;
+    object-fit: cover;
+    border-radius: 15px;
+    flex-shrink: 0; /* Supaya gambar tidak mengecil saat teks banyak */
+}
+/* Pastikan deskripsi punya ruang yang cukup */
+.product-description-text {
+    color: #555;
+    line-height: 1.6;
+    text-align: justify;
+    margin-bottom: 20px;
+    min-height: 4.8em; /* Ini untuk memaksa minimal sekitar 3 baris */
+    max-height: 6.4em; /* Ini untuk maksimal sekitar 4 baris */
+    overflow: hidden;
+}
+
+/* Container baru untuk baris bawah */
+.modal-footer-actions {
+    display: flex;
+    flex-direction: row; /* Berjejer ke samping */
+    gap: 15px;
+    align-items: center;
+    border-top: 1px solid rgba(139, 115, 85, 0.1);
+    padding-top: 20px;
+}                                            
     </style>
 </head>
 <body>
@@ -985,27 +1066,27 @@ nav {
                 grid.innerHTML = '<p style="text-align:center;color:#7a6c5b;padding:40px;grid-column:1/-1;">Tidak ada produk ditemukan.</p>';
             } else {
                 pageItems.forEach(product => {
-                    const card = document.createElement('div');
-                    card.className = 'product-card';
-                    card.innerHTML = `
-                        <div class="product-image-container">
-                            <img src="${product.image_url ?? '/images/products/default.jpg'}" alt="${product.name}" class="product-image">
-                        </div>
-                        <div class="product-info">
-                            <h3 class="product-name">${product.name}</h3>
-                            <p class="product-price">Rp ${Number(product.price).toLocaleString('id-ID')}</p>
-                            <div class="product-actions">
-                                <button class="btn-add-cart" data-product-id="${product.id}" data-product-name="${product.name}">
-                                    <svg viewBox="0 0 24 24">
-                                        <circle cx="9" cy="21" r="1"></circle>
-                                        <circle cx="20" cy="21" r="1"></circle>
-                                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                                    </svg>
-                                    Masukkan ke keranjang
-                                </button>
-                            </div>
-                        </div>
-                    `;
+const card = document.createElement('div');
+card.className = 'product-card';
+card.innerHTML = `
+    <div class="product-image-container" onclick="showDetail(${product.id})" style="cursor:pointer;">
+        <img src="${product.image_url ?? '/images/products/default.jpg'}" alt="${product.name}" class="product-image">
+    </div>
+    <div class="product-info">
+        <h3 class="product-name" onclick="showDetail(${product.id})" style="cursor:pointer;">${product.name}</h3>
+        <p class="product-price">Rp ${Number(product.price).toLocaleString('id-ID')}</p>
+        <div class="product-actions">
+            <button class="btn-add-cart">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+                Masukkan ke keranjang
+            </button>
+        </div>
+    </div>
+`;
 
                     const button = card.querySelector('.btn-add-cart');
                     button.addEventListener('click', function() {
@@ -1042,6 +1123,103 @@ nav {
             document.getElementById('productSearch').addEventListener('input', filterProducts);
             renderGrid();
         });
+                                            
+function showDetail(productId) {
+    const product = menuProducts.find(p => p.id === productId);
+    if (!product) return;
+
+    const modal = document.getElementById('productModal');
+    const modalBody = document.getElementById('modalBody');
+
+    // Kumpulan variasi kalimat promosi supaya tidak bosan
+    const variasiTeks = [
+        "Dibuat dengan resep rahasia keluarga Kharisma yang dijaga kemurniannya. Menggunakan bahan pilihan untuk tekstur yang pas di lidah.",
+        "Camilan legendaris yang cocok menemani waktu santai Anda. Tanpa bahan pengawet dan dijamin fresh setiap hari langsung dari dapur kami.",
+        "Menghadirkan cita rasa tradisional yang otentik dalam setiap gigitan. Sangat lembut, manisnya pas, dan bikin ketagihan siapa saja.",
+        "Kue istimewa yang diproses secara higienis menggunakan bahan-bahan premium. Pilihan terbaik untuk hidangan acara keluarga atau arisan."
+    ];
+
+    // Pilih teks secara acak berdasarkan ID produk supaya konsisten tapi beda antar produk
+    const indexAcak = productId % variasiTeks.length;
+    const extraDesc = variasiTeks[indexAcak];
+
+    // Gabungkan deskripsi asli database dengan teks acak tadi
+    let descAsli = product.description || `${product.name} yang enak dan lezat.`;
+    let fullDescription = `${descAsli} ${extraDesc}`;
+
+    modalBody.innerHTML = `
+        <img src="${product.image_url ?? '/images/products/default.jpg'}" class="modal-img">
+        <div style="flex: 1; display: flex; flex-direction: column;">
+            <h2 style="color: #2c2c2c; margin-bottom: 5px; font-size: 1.8rem;">${product.name}</h2>
+            
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px; color: #777; font-size: 0.95rem;">
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    <span style="color: #ff9800; font-size: 1.2rem;">★</span> 
+                    <span style="font-weight: bold; color: #333;">4.8</span> 
+                    <span>(2.2k ulasan)</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <span>5.4k dilihat</span>
+                </div>
+            </div>
+
+            <p style="color: #8b7355; font-weight: bold; font-size: 1.6rem; margin-bottom: 15px;">
+                Rp ${Number(product.price).toLocaleString('id-ID')}
+            </p>
+            
+            <div style="flex-grow: 1;">
+                <h4 style="color: #4a4a4a; margin-bottom: 5px;">Deskripsi Produk:</h4>
+                <p class="product-description-text" style="
+                    color: #555; 
+                    line-height: 1.6; 
+                    text-align: justify; 
+                    margin-bottom: 20px;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 4;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                    min-height: 6.4em;
+                ">
+                    ${fullDescription}
+                </p>
+            </div>
+            
+            <div class="modal-footer-actions" style="display: flex; flex-direction: row; gap: 15px; align-items: center; border-top: 1px solid rgba(139, 115, 85, 0.1); padding-top: 20px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label style="color: #555; font-weight: 600; white-space: nowrap;">Jumlah:</label>
+                    <input type="number" id="detailQty" value="1" min="1" 
+                        style="width: 70px; padding: 12px; border-radius: 12px; border: 1.5px solid #d4b896; text-align: center; background: white;">
+                </div>
+                <button class="btn-add-cart" style="flex: 1; padding: 15px; height: 50px;" 
+                    onclick="closeModal(); addToCart(this, ${product.id}, '${product.name}', ${product.price})">
+                    Tambah ke Keranjang
+                </button>
+            </div>
+        </div>
+    `;
+
+    modal.style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('productModal').style.display = 'none';
+}
+
+// Tutup modal jika klik di luar kotak putih
+window.onclick = function(event) {
+    const modal = document.getElementById('productModal');
+    if (event.target == modal) {
+        closeModal();
+    }
+}
     </script>
+                                            <div id="productModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <div class="modal-body" id="modalBody">
+            </div>
+    </div>
+</div>
 </body>
 </html>
